@@ -1,8 +1,8 @@
 
 import streamlit as st
-from .pages import visualization, carbon_calculator, policy_suggestions, eco_game
 
 st.set_page_config(page_title="CarbonBalance Gyeonggi", page_icon="🌱", layout="wide")
+from .pages import visualization, carbon_calculator, policy_suggestions, eco_game
 
 def main():
     st.title("CarbonBalance Gyeonggi")
