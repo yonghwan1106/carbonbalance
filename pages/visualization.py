@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import os
+import io 
 
 def clean_numeric(x):
     if isinstance(x, str):
@@ -125,5 +126,3 @@ def show():
 if __name__ == "__main__":
     show()
 
-if __name__ == "__main__":
-    show()
