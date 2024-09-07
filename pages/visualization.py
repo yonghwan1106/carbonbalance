@@ -8,7 +8,13 @@ def show():
 
     @st.cache_data
     def load_data():
-        df = pd.read_csv("data/gyeonggi_carbon_data_2022.csv")
+        try:
+            # UTF-8 인코딩으로 먼저 시도
+            df = pd.read_csv("data/gyeonggi_carbon_data_2022.csv", encoding='utf-8')
+        except UnicodeDecodeError:
+            # UTF-8로 읽기 실패시 CP949로 시도
+            df = pd.read_csv("data/gyeonggi_carbon_data_2022.csv", encoding='cp949')
+        
         df['총배출량'] = df['배출_건물_전기'] + df['배출_건물_지역난방'] + df['배출_건물_가스'] + df['탄소배출_수송']
         df['순배출량'] = df['총배출량'] - df['탄소흡수_산림']
         return df
