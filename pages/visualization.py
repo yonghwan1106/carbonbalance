@@ -8,7 +8,7 @@ def show():
 
     @st.cache_data
     def load_data():
-        df = pd.read_csv("data/gyeonggi_carbon_data_2022.csv")
+        df = pd.read_csv("gyeonggi_carbon_data_2022.csv")
         df['총배출량'] = df['배출_건물_전기'] + df['배출_건물_지역난방'] + df['배출_건물_가스'] + df['탄소배출_수송']
         df['순배출량'] = df['총배출량'] - df['탄소흡수_산림']
         return df
