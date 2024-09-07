@@ -2,6 +2,10 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import os
+
+file_path = os.path.join(os.path.dirname(__file__), "..", "data", "gyeonggi_carbon_data_2022.csv")
+df = pd.read_csv(file_path, encoding='utf-8')
 
 def show():
     st.title("경기도 지자체별 탄소 배출 및 흡수량 분석 (2022년)")
