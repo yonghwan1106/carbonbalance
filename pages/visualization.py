@@ -4,31 +4,51 @@ import plotly.express as px
 import plotly.graph_objects as go
 import os
 
-file_path = os.path.join(os.path.dirname(__file__), "..", "data", "gyeonggi_carbon_data_2022.csv")
-df = pd.read_csv("data/gyeonggi_carbon_data_2022.csv", encoding='utf-8-sig')
+def clean_numeric(x):
+    if isinstance(x, str):
+        return float(x.replace(',', '').replace('-', '0'))
+    return float(x)
 
+@st.cache_data
+def load_data():
+    file_path = os.path.join(os.path.dirname(__file__), "..", "data", "gyeonggi_carbon_data_2022.csv")
+    try:
+        df = pd.read_csv(file_path, encoding='utf-8')
+    except UnicodeDecodeError:
+        df = pd.read_csv(file_path, encoding='cp949')
+    
+    numeric_columns = ['배출_건물_전기', '배출_건물_지역난방', '배출_건물_가스', '탄소배출_수송', '탄소흡수_산림']
+    
+    for col in numeric_columns:
+        df[col] = df[col].apply(clean_numeric)
+    
+    df['총배출량'] = df[numeric_columns[:4]].sum(axis=1)
+    df['순배출량'] = df['총배출량'] - df['탄소흡수_산림']
+    
+    return df
 
 def show():
     st.title("경기도 지자체별 탄소 배출 및 흡수량 분석 (2022년)")
-
-    @st.cache_data
-    def load_data():
-        try:
-            # UTF-8 인코딩으로 먼저 시도
-            df = pd.read_csv("data/gyeonggi_carbon_data_2022.csv", encoding='utf-8')
-        except UnicodeDecodeError:
-            # UTF-8로 읽기 실패시 CP949로 시도
-            df = pd.read_csv("data/gyeonggi_carbon_data_2022.csv", encoding='cp949')
-        
-        df['총배출량'] = df['배출_건물_전기'] + df['배출_건물_지역난방'] + df['배출_건물_가스'] + df['탄소배출_수송']
-        df['순배출량'] = df['총배출량'] - df['탄소흡수_산림']
-        return df
 
     df = load_data()
 
     # 데이터 개요
     st.subheader("데이터 개요")
     st.write(df.describe())
+
+    # 데이터 타입 및 결측값 확인
+    st.subheader("데이터 정보")
+    buffer = io.StringIO()
+    df.info(buf=buffer)
+    s = buffer.getvalue()
+    st.text(s)
+    
+    st.subheader("결측값 확인")
+    st.write(df.isnull().sum())
+
+    # 상위 5개 행 표시
+    st.subheader("데이터 미리보기")
+    st.write(df.head())
 
     # 지자체 선택 옵션
     selected_municipalities = st.multiselect(
