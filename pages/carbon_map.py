@@ -5,6 +5,10 @@ import json
 import requests
 import os
 
+# 프로젝트 루트 디렉토리를 sys.path에 추가
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
 @st.cache_data
 def load_data():
     file_path = os.path.join(os.path.dirname(__file__), "..", "data", "gyeonggi_carbon_data_2022.csv")
