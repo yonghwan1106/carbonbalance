@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from utils.ai_helper import get_policy_suggestions
-from utils.data_processor import load_gyeonggi_data, analyze_emissions_trend
+from ..utils.ai_helper import get_policy_suggestions
+from ..utils.data_processor import load_gyeonggi_data, analyze_emissions_trend
 
 def show():
     st.title("지역 맞춤형 친환경 정책 제안 플랫폼")
