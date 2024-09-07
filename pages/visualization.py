@@ -8,7 +8,7 @@ def show():
     # Load data (replace with actual data loading)
     @st.cache_data
     def load_data():
-        return pd.read_csv("data/gyeonggi_carbon_data.csv")
+        return pd.read_csv("c_emi_b_electricity_gg_2022.csv")
     
     df = load_data()
     
