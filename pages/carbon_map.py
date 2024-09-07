@@ -27,7 +27,7 @@ def load_data():
 @st.cache_data
 def load_geojson():
     # 경기도 GeoJSON 파일의 URL (예시 URL입니다. 실제 데이터 URL로 교체해야 합니다)
-    url = "https://raw.githubusercontent.com/yourrepository/gyeonggi.geojson"
+    url = "https://github.com/southkorea/southkorea-maps"
     response = requests.get(url)
     return json.loads(response.text)
 
