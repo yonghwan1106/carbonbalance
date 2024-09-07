@@ -1,3 +1,4 @@
+
 import random
 
 def get_emission_reduction_tips(footprint, transportation, energy_usage, food_habits, consumer_goods):
@@ -50,3 +51,100 @@ def generate_eco_mission():
         {"description": "오늘 하루 냉난방 1도 줄이기", "carbon_reduction": 1.5}
     ]
     return random.choice(missions)
+
+def generate_quiz_question(carbon_data):
+    """
+    경기도 탄소 배출 데이터를 바탕으로 퀴즈 문제를 생성합니다.
+    """
+    question_types = [
+        "highest_emitter",
+        "lowest_emitter",
+        "compare_cities",
+        "total_emissions",
+        "above_average",
+    ]
+    
+    question_type = random.choice(question_types)
+    
+    if question_type == "highest_emitter":
+        highest_emitter = max(carbon_data, key=carbon_data.get)
+        options = random.sample(list(carbon_data.keys()), 4)
+        if highest_emitter not in options:
+            options[0] = highest_emitter
+        random.shuffle(options)
+        
+        return {
+            "question": "2020년 기준 경기도에서 탄소 배출량이 가장 많은 도시는?",
+            "options": options,
+            "correct_answer": highest_emitter,
+            "explanation": f"{highest_emitter}의 탄소 배출량은 {carbon_data[highest_emitter]}천톤 CO2eq로, 경기도 내에서 가장 높습니다."
+        }
+    
+    elif question_type == "lowest_emitter":
+        lowest_emitter = min(carbon_data, key=carbon_data.get)
+        options = random.sample(list(carbon_data.keys()), 4)
+        if lowest_emitter not in options:
+            options[0] = lowest_emitter
+        random.shuffle(options)
+        
+        return {
+            "question": "2020년 기준 경기도에서 탄소 배출량이 가장 적은 도시는?",
+            "options": options,
+            "correct_answer": lowest_emitter,
+            "explanation": f"{lowest_emitter}의 탄소 배출량은 {carbon_data[lowest_emitter]}천톤 CO2eq로, 경기도 내에서 가장 낮습니다."
+        }
+    
+    elif question_type == "compare_cities":
+        cities = random.sample(list(carbon_data.keys()), 2)
+        higher_emitter = max(cities, key=lambda x: carbon_data[x])
+        lower_emitter = min(cities, key=lambda x: carbon_data[x])
+        
+        return {
+            "question": f"2020년 기준 {cities[0]}와 {cities[1]} 중 탄소 배출량이 더 많은 도시는?",
+            "options": cities,
+            "correct_answer": higher_emitter,
+            "explanation": f"{higher_emitter}의 탄소 배출량은 {carbon_data[higher_emitter]}천톤 CO2eq로, {lower_emitter}의 {carbon_data[lower_emitter]}천톤 CO2eq보다 높습니다."
+        }
+    
+    elif question_type == "total_emissions":
+        total_emissions = sum(carbon_data.values())
+        options = [
+            round(total_emissions * 0.8),
+            round(total_emissions * 0.9),
+            round(total_emissions),
+            round(total_emissions * 1.1)
+        ]
+        random.shuffle(options)
+        
+        return {
+            "question": "2020년 기준 경기도의 총 탄소 배출량은 약 얼마일까요? (천톤 CO2eq)",
+            "options": options,
+            "correct_answer": round(total_emissions),
+            "explanation": f"2020년 기준 경기도의 총 탄소 배출량은 약 {round(total_emissions)}천톤 CO2eq입니다."
+        }
+    
+    elif question_type == "above_average":
+        average_emission = sum(carbon_data.values()) / len(carbon_data)
+        above_average_cities = [city for city, emission in carbon_data.items() if emission > average_emission]
+        correct_answer = len(above_average_cities)
+        options = [correct_answer - 2, correct_answer - 1, correct_answer, correct_answer + 1]
+        options = [max(0, option) for option in options]
+        options = list(set(options))  # Remove duplicates
+        if len(options) < 4:
+            options.append(correct_answer + 2)
+        options = sorted(options)[:4]  # Ensure we have exactly 4 options
+        
+        return {
+            "question": "2020년 기준 경기도에서 평균 이상의 탄소를 배출하는 도시의 수는?",
+            "options": options,
+            "correct_answer": correct_answer,
+            "explanation": f"경기도의 평균 탄소 배출량은 약 {round(average_emission)}천톤 CO2eq이며, {correct_answer}개 도시가 이를 초과합니다."
+        }
+
+    # 기본 반환 (이 부분까지 오면 안 되지만, 혹시 모를 경우를 대비)
+    return {
+        "question": "경기도의 탄소 배출에 대한 다음 설명 중 옳은 것은?",
+        "options": ["경기도는 탄소 배출이 없다", "모든 도시의 탄소 배출량이 동일하다", "수원시가 가장 많은 탄소를 배출한다", "화성시가 가장 많은 탄소를 배출한다"],
+        "correct_answer": "화성시가 가장 많은 탄소를 배출한다",
+        "explanation": "2020년 기준 화성시의 탄소 배출량이 경기도 내에서 가장 높습니다."
+    }
