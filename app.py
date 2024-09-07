@@ -1,9 +1,10 @@
+import streamlit as st
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import streamlit as st
-from pages import visualization, carbon_calculator, policy_suggestions, eco_game
+# 프로젝트 루트 디렉토리를 sys.path에 추가
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 
 st.set_page_config(page_title="CarbonBalance Gyeonggi", page_icon="🌱", layout="wide")
 
