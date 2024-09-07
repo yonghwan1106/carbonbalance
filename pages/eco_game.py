@@ -1,8 +1,14 @@
 import streamlit as st
 import pandas as pd
 import random
-from ..utils.data_processor import load_gyeonggi_data
-from ..utils.ai_helper import generate_eco_mission
+import sys
+import os
+
+# 프로젝트 루트 디렉토리를 sys.path에 추가
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from utils.data_processor import load_gyeonggi_data
+from utils.ai_helper import generate_eco_mission
 
 def show():
     st.title("ECO 챌린지: 경기도 탄소 중립 게임")
