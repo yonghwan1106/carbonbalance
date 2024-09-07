@@ -1,7 +1,14 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from ..utils.ai_helper import get_emission_reduction_tips
+import sys
+import os
+
+# 프로젝트 루트 디렉토리를 sys.path에 추가
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from utils.ai_helper import get_emission_reduction_tips
+
 
 def calculate_carbon_footprint(transportation, energy_usage, food_habits, consumer_goods):
     # 이 함수는 실제 계산 로직으로 대체되어야 합니다.
