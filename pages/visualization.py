@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -27,6 +28,106 @@ def load_data():
     df['순배출량'] = df['총배출량'] - df['탄소흡수_산림']
     
     return df
+
+def plot_carbon_neutrality_progress(df):
+    """
+    각 지자체의 탄소 배출량과 흡수량을 비교하여 탄소 중립 달성 정도를 시각화합니다.
+    """
+    df['탄소중립달성도'] = (df['탄소흡수_산림'] / df['총배출량'] * 100).clip(upper=100)
+    df = df.sort_values('탄소중립달성도', ascending=False)
+
+    fig = go.Figure()
+    
+    fig.add_trace(go.Bar(
+        x=df['지자체명'],
+        y=df['총배출량'],
+        name='탄소 배출량',
+        marker_color='red'
+    ))
+    
+    fig.add_trace(go.Bar(
+        x=df['지자체명'],
+        y=df['탄소흡수_산림'],
+        name='탄소 흡수량',
+        marker_color='green'
+    ))
+    
+    fig.add_trace(go.Scatter(
+        x=df['지자체명'],
+        y=df['탄소중립달성도'],
+        name='탄소 중립 달성도 (%)',
+        yaxis='y2',
+        mode='lines+markers',
+        line=dict(color='blue', width=2),
+        marker=dict(size=8)
+    ))
+    
+    fig.update_layout(
+        title='경기도 지자체별 탄소 중립 달성 현황',
+        xaxis_title='지자체',
+        yaxis_title='탄소량 (천톤 CO2eq)',
+        yaxis2=dict(
+            title='탄소 중립 달성도 (%)',
+            overlaying='y',
+            side='right',
+            range=[0, 100]
+        ),
+        barmode='group',
+        legend=dict(x=1.1, y=1),
+        height=600
+    )
+    
+    return fig
+
+def plot_top_carbon_neutral_cities(df, top_n=5):
+    """
+    탄소 중립 달성도가 가장 높은 상위 N개 도시를 시각화합니다.
+    """
+    df['탄소중립달성도'] = (df['탄소흡수_산림'] / df['총배출량'] * 100).clip(upper=100)
+    df = df.sort_values('탄소중립달성도', ascending=False).head(top_n)
+    
+    fig = go.Figure()
+    
+    fig.add_trace(go.Bar(
+        x=df['지자체명'],
+        y=df['총배출량'],
+        name='탄소 배출량',
+        marker_color='red'
+    ))
+    
+    fig.add_trace(go.Bar(
+        x=df['지자체명'],
+        y=df['탄소흡수_산림'],
+        name='탄소 흡수량',
+        marker_color='green'
+    ))
+    
+    fig.add_trace(go.Scatter(
+        x=df['지자체명'],
+        y=df['탄소중립달성도'],
+        name='탄소 중립 달성도 (%)',
+        yaxis='y2',
+        mode='lines+markers',
+        line=dict(color='blue', width=2),
+        marker=dict(size=8)
+    ))
+    
+    fig.update_layout(
+        title=f'탄소 중립 달성도 상위 {top_n}개 지자체',
+        xaxis_title='지자체',
+        yaxis_title='탄소량 (천톤 CO2eq)',
+        yaxis2=dict(
+            title='탄소 중립 달성도 (%)',
+            overlaying='y',
+            side='right',
+            range=[0, 100]
+        ),
+        barmode='group',
+        legend=dict(x=1.1, y=1),
+        height=500
+    )
+    
+    return fig
 
 def show():
     st.title("경기도 지자체별 탄소 배출 및 흡수량 분석 (2022년)")
@@ -109,6 +210,17 @@ def show():
     fig_comparison.update_layout(xaxis_tickangle=-45)
     st.plotly_chart(fig_comparison)
 
+    # 새로운 시각화: 탄소 중립 달성 정도
+    st.subheader("경기도 지자체별 탄소 중립 달성 현황")
+    fig_neutrality = plot_carbon_neutrality_progress(df)
+    st.plotly_chart(fig_neutrality)
+
+    # 새로운 시각화: 상위 탄소 중립 도시
+    st.subheader("탄소 중립 달성도 상위 지자체")
+    top_n = st.slider("표시할 상위 지자체 수를 선택하세요", min_value=3, max_value=10, value=5)
+    fig_top_neutral = plot_top_carbon_neutral_cities(df, top_n)
+    st.plotly_chart(fig_top_neutral)
+
     # 결론 및 인사이트
     st.subheader("결론 및 인사이트")
     st.write("""
@@ -116,6 +228,7 @@ def show():
     - 일부 지자체는 수송으로 인한 탄소 배출이 상대적으로 높습니다. 이는 해당 지역의 교통 특성을 반영합니다.
     - 산림을 통한 탄소 흡수량은 지자체별로 큰 차이를 보입니다. 일부 지역은 높은 흡수량으로 순 배출량을 크게 줄이고 있습니다.
     - 순 배출량을 기준으로 볼 때, 산림 면적이 넓은 지자체들이 상대적으로 유리한 위치에 있습니다.
+    - 탄소 중립 달성도를 보면, 일부 지자체는 이미 높은 수준의 탄소 중립을 달성하고 있으나, 대부분의 지자체는 아직 갈 길이 멀어 보입니다.
     - 탄소 중립을 위해서는 배출량 감소와 흡수량 증가를 동시에 고려한 정책이 필요해 보입니다.
     """)
 
@@ -125,4 +238,3 @@ def show():
 
 if __name__ == "__main__":
     show()
-
