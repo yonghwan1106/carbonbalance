@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
 import random
-from utils.data_processor import load_gyeonggi_data
-from utils.ai_helper import generate_eco_mission
+from ..utils.data_processor import load_gyeonggi_data
+from ..utils.ai_helper import generate_eco_mission
 
 def show():
     st.title("ECO 챌린지: 경기도 탄소 중립 게임")
