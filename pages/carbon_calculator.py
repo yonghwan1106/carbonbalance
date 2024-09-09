@@ -148,6 +148,9 @@ def show():
                 tips = get_emission_reduction_tips(footprint, transportation, energy_usage, food_habits, consumer_goods, waste)
             for tip in tips:
                 st.write(f"- {tip}")
+                
+            # 추가 정보 제공
+            st.info("이 팁들은 AI에 의해 생성되었으며, 귀하의 개인 상황에 맞춰 제안되었습니다. 실행 가능성을 고려하여 적용해 보세요.")
 
             # 결과 저장
             save_user_data({
