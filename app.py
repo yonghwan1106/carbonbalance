@@ -15,7 +15,7 @@ def main():
     choice = st.sidebar.selectbox("Menu", menu)
     
     if choice == "Home":
-        st.write(""탄소중립 경기도"에 오신 것을 환영합니다!")
+        st.write("탄소중립 경기도에 오신 것을 환영합니다!")
         st.write("이 앱은 경기도에서 당신의 탄소 배출을 관리하고 이해하도록 돕는 사이트입니다.")
     elif choice == "Visualization":
         visualization.show()
