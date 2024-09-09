@@ -265,8 +265,8 @@ def show():
     if st.button("AI 인사이트 생성"):
         with st.spinner("AI가 데이터를 분석하고 인사이트를 생성하고 있습니다..."):
             insights = get_ai_insights(df)
-        for i, insight in enumerate(insights, 1):
-            st.markdown(f"**{i}. {insight}**")
+        for i, insight in enumerate(insights, 0):
+            st.markdown(f"{i}. {insight}")
 
     # 데이터 출처 및 주의사항
     st.info("데이터 출처: 국토교통부 탄소공간지도시스템, 2022년 기준")
