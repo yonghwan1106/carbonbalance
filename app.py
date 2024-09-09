@@ -6,7 +6,7 @@ from pages import visualization, carbon_calculator, policy_suggestions, eco_game
 # 프로젝트 루트 디렉토리를 sys.path에 추가
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-st.set_page_config(page_title="CarbonBalance Gyeonggi", page_icon="🌱", layout="wide")
+st.set_page_config(page_title="탄소중립 경기도!", page_icon="🌱", layout="wide")
 
 def main():
     st.title("CarbonBalance Gyeonggi")
@@ -15,7 +15,6 @@ def main():
     choice = st.sidebar.selectbox("Menu", menu)
     
     if choice == "Home":
-        st.write("탄소중립 경기도에 오신 것을 환영합니다!")
         st.write("이 앱은 경기도에서 당신의 탄소 배출을 관리하고 이해하도록 돕는 사이트입니다.")
     elif choice == "Visualization":
         visualization.show()
