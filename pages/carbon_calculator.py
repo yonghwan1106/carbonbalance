@@ -17,12 +17,20 @@ GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 
 # 탄소 발자국 계산 함수 개선
 def calculate_carbon_footprint(transportation, energy_usage, food_habits, consumer_goods, waste):
-    # 더 정확한 계산을 위한 가중치와 계수 적용
-    transport_footprint = transportation * 0.2
-    energy_footprint = energy_usage * 0.4
-    food_footprint = food_habits * 0.3
-    consumer_goods_footprint = consumer_goods * 0.05
-    waste_footprint = waste * 0.05
+    # 교통 (주간 자동차 사용 km)
+    transport_footprint = (transportation * 52 * 0.12) / 1000  # 연간으로 환산, kg CO2/km, 톤 단위로 변환
+
+    # 에너지 사용 (월간 전기 사용량 kWh, 4인 가구 기준)
+    energy_footprint = (energy_usage * 12 * 0.4) / 1000  # 연간으로 환산, kg CO2/kWh, 톤 단위로 변환
+
+    # 식습관 (주간 육류 소비 횟수)
+    food_footprint = (food_habits * 52 * 3.3) / 1000  # 연간으로 환산, kg CO2e/식사, 톤 단위로 변환
+
+    # 소비재 (월간 새 물건 구매 횟수)
+    consumer_goods_footprint = (consumer_goods * 12 * 10) / 1000  # 연간으로 환산, kg CO2e/구매, 톤 단위로 변환
+
+    # 폐기물 (주간 재활용하지 않는 쓰레기 kg)
+    waste_footprint = (waste * 52 * 0.5) / 1000  # 연간으로 환산, kg CO2e/kg 쓰레기, 톤 단위로 변환
     
     total_footprint = (
         transport_footprint +
@@ -31,6 +39,7 @@ def calculate_carbon_footprint(transportation, energy_usage, food_habits, consum
         consumer_goods_footprint +
         waste_footprint
     )
+    
     return total_footprint, {
         "교통": transport_footprint,
         "에너지": energy_footprint,
@@ -112,7 +121,12 @@ def show():
             if comparison > 0:
                 st.write(f"당신의 탄소 발자국은 지역 평균보다 {comparison:.1f}% 높습니다.")
             else:
-                st.write(f"당신의 탄소 발자국은 지역 평균보다 {-comparison:.1f}% 낮습니다.")
+                st.write(f"당신의 탄소 발자국은 지역 평균보다 {abs(comparison):.1f}% 낮습니다.")
+
+            # 각 항목별 탄소발자국 발생량 표시
+            st.subheader("항목별 탄소발자국 발생량:")
+            for category, amount in footprint_breakdown.items():
+                st.write(f"{category}: {amount:.2f} 톤 CO2e")
 
             # 탄소 발자국 내역 시각화
             fig = px.pie(
