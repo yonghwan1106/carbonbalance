@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 st.set_page_config(page_title="탄소중립 경기도!", page_icon="🌱", layout="wide")
 
 def main():
-    st.title("CarbonBalance Gyeonggi")
+    st.title("🌱 CarbonBalance Gyeonggi")
     
     menu = ["Home", "Visualization", "Carbon Map", "Carbon Calculator", "Policy Suggestions", "Eco Game"]
     choice = st.sidebar.selectbox("Menu", menu)
