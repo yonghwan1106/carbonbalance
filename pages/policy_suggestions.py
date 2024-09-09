@@ -27,8 +27,9 @@ def get_ai_policy_suggestions(region, emissions_data):
     배출 트렌드: {emissions_data['trend']}
     부문별 배출 비중: {emissions_data['sector_breakdown']}
 
-    위 정보를 바탕으로 {region}의 탄소 배출량을 줄이기 위한 구체적인 정책 5가지를 제안해주세요. 
-    각 정책은 지역 특성을 고려하고, 실행 가능해야 합니다.
+    위 정보를 바탕으로 {region}의 탄소 배출량을 줄이기 위한 구체적인 정책을 제안해주세요. 
+    각 정책은 지역 특성을 고려하고, 실행 가능해야 합니다. 정책의 수에는 제한이 없으며, 
+    가능한 한 상세하고 다양한 정책을 제안해주세요.
     """
 
     data = {
@@ -38,9 +39,9 @@ def get_ai_policy_suggestions(region, emissions_data):
 
     response = requests.post(URL, headers=headers, data=json.dumps(data))
     if response.status_code == 200:
-        return response.json()['choices'][0]['message']['content'].split('\n')
+        return response.json()['choices'][0]['message']['content']
     else:
-        return ["API 요청 중 오류가 발생했습니다."]
+        return "API 요청 중 오류가 발생했습니다."
 
 def show():
     st.title("🌿 지역 맞춤형 친환경 정책 제안 플랫폼")
@@ -83,8 +84,7 @@ def show():
                 policy_suggestions = get_ai_policy_suggestions(selected_region, emissions_data)
             
             st.subheader("💡 AI 기반 정책 제안")
-            for i, suggestion in enumerate(policy_suggestions, 1):
-                st.write(f"{i}. {suggestion}")
+            st.write(policy_suggestions)
 
         # 정책 효과 시뮬레이션 (간단한 예시)
         st.subheader("🔬 정책 효과 시뮬레이션")
