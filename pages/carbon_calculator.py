@@ -142,6 +142,13 @@ def show():
                          title='Your Carbon Footprint vs Region Average')
             st.plotly_chart(fig)
 
+            # AI 맞춤형 팁 제공
+            st.subheader("AI의 탄소 배출 감소를 위한 맞춤형 팁:")
+            with st.spinner("AI가 맞춤형 팁을 생성하고 있습니다..."):
+                tips = get_emission_reduction_tips(footprint, transportation, energy_usage, food_habits, consumer_goods, waste)
+            for tip in tips:
+                st.write(f"- {tip}")
+
             # 결과 저장
             save_user_data({
                 "date": datetime.now().strftime("%Y-%m-%d"),
@@ -152,13 +159,6 @@ def show():
             # 추가 정보 제공
             st.info("이 계산은 대략적인 추정치입니다. 정확한 탄소 발자국 계산을 위해서는 더 자세한 생활 습관 분석이 필요합니다.")
 
-            # AI 맞춤형 팁 버튼
-            if st.button("탄소 배출 감소를 위한 맞춤형 팁 받기"):
-                with st.spinner("AI가 맞춤형 팁을 생성하고 있습니다..."):
-                    tips = get_emission_reduction_tips(footprint, transportation, energy_usage, food_habits, consumer_goods, waste)
-                st.subheader("탄소 배출 감소를 위한 맞춤형 팁:")
-                for tip in tips:
-                    st.write(f"- {tip}")
 
     with tabs[1]:  # 히스토리 탭
         st.subheader("탄소 발자국 히스토리")
