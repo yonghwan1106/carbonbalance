@@ -201,7 +201,7 @@ def show():
     filtered_df = df[df['지자체명'].isin(selected_municipalities)]
 
     # 총 배출량 비교 막대 차트
-    st.subheader("지자체별 총 탄소 배출량 비교")
+    st.subheader("📊 지자체별 총 탄소 배출량 비교")
     fig_total = px.bar(filtered_df, x="지자체명", y="총배출량", 
                        title="지자체별 총 탄소 배출량",
                        color="총배출량",
@@ -210,7 +210,7 @@ def show():
     st.plotly_chart(fig_total)
 
     # 배출 원인별 비교 막대 차트
-    st.subheader("지자체별 탄소 배출 원인 비교")
+    st.subheader("ℹ️ 지자체별 탄소 배출 원인 비교")
     fig_sources = px.bar(filtered_df, x="지자체명", 
                          y=["배출_건물_전기", "배출_건물_지역난방", "배출_건물_가스", "탄소배출_수송"],
                          title="지자체별 탄소 배출 원인 비교",
@@ -219,7 +219,7 @@ def show():
     st.plotly_chart(fig_sources)
 
     # 순 배출량 (배출량 - 흡수량) 비교
-    st.subheader("지자체별 순 탄소 배출량 비교")
+    st.subheader("👀 지자체별 순 탄소 배출량 비교")
     fig_net = px.bar(filtered_df, x="지자체명", y="순배출량", 
                      title="지자체별 순 탄소 배출량 (총 배출량 - 흡수량)",
                      color="순배출량",
@@ -228,7 +228,7 @@ def show():
     st.plotly_chart(fig_net)
 
     # 산점도: 총 배출량 vs 흡수량
-    st.subheader("총 탄소 배출량 vs 흡수량 관계")
+    st.subheader("🔍 총 탄소 배출량 vs 흡수량 관계")
     fig_scatter = px.scatter(filtered_df, x="총배출량", y="탄소흡수_산림", 
                              size="순배출량", color="지자체명",
                              hover_name="지자체명", log_x=True, log_y=True,
@@ -236,7 +236,7 @@ def show():
     st.plotly_chart(fig_scatter)
 
     # 상위 5개 지자체와 하위 5개 지자체 비교
-    st.subheader("순 탄소 배출량 상위 5개 및 하위 5개 지자체")
+    st.subheader("📊 순 탄소 배출량 상위 5개 및 하위 5개 지자체")
     top_5 = df.nlargest(5, '순배출량')
     bottom_5 = df.nsmallest(5, '순배출량')
     comparison_df = pd.concat([top_5, bottom_5])
@@ -250,12 +250,12 @@ def show():
     st.plotly_chart(fig_comparison)
 
     # 새로운 시각화: 탄소 중립 달성 정도
-    st.subheader("경기도 지자체별 탄소 중립 달성 현황")
+    st.subheader("ℹ️ 경기도 지자체별 탄소 중립 달성 현황")
     fig_neutrality = plot_carbon_neutrality_progress(df)
     st.plotly_chart(fig_neutrality)
 
     # 새로운 시각화: 상위 탄소 중립 도시
-    st.subheader("탄소 중립 달성도 상위 지자체")
+    st.subheader("🔍 탄소 중립 달성도 상위 지자체")
     top_n = st.slider("표시할 상위 지자체 수를 선택하세요", min_value=3, max_value=10, value=5)
     fig_top_neutral = plot_top_carbon_neutral_cities(df, top_n)
     st.plotly_chart(fig_top_neutral)
