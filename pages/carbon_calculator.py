@@ -46,7 +46,7 @@ def load_user_data():
     return st.session_state.get('user_data', [])
 
 def show():
-    st.title("고급 개인 탄소 발자국 계산기")
+    st.title("개인 탄소 발자국 계산기")
 
     st.write("일상생활에서의 탄소 발자국을 자세히 계산하고 추적해보세요.")
 
