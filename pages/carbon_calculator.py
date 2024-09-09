@@ -72,7 +72,7 @@ def get_emission_reduction_tips(footprint, transportation, energy_usage, food_ha
         "model": MODEL,
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.7,
-        "max_tokens": 1000
+        "max_tokens": 300
     }
 
     response = requests.post(API_URL, headers=headers, json=data)
@@ -139,7 +139,7 @@ def show():
             # 비교 시각화
             fig = px.bar(x=['Your Footprint', 'Region Average'], y=[footprint, region_average],
                          labels={'x': '', 'y': 'Carbon Footprint (tons CO2e)'},
-                         title='당신의 탄소발자국 vs 지역 탄소발자국 평균')
+                         title='Your Carbon Footprint vs Region Average')
             st.plotly_chart(fig)
 
             # AI 맞춤형 팁 제공
@@ -148,6 +148,18 @@ def show():
                 tips = get_emission_reduction_tips(footprint, transportation, energy_usage, food_habits, consumer_goods, waste)
             for tip in tips:
                 st.write(f"- {tip}")
+
+            # 결과 저장
+            save_user_data({
+                "date": datetime.now().strftime("%Y-%m-%d"),
+                "footprint": footprint,
+                "breakdown": footprint_breakdown,
+                "transportation": transportation,
+                "energy_usage": energy_usage,
+                "food_habits": food_habits,
+                "consumer_goods": consumer_goods,
+                "waste": waste
+            })
 
             # 계산 방법 설명
             st.subheader("ℹ️ 계산 방법 설명")
@@ -162,30 +174,31 @@ def show():
             이 계산 방법은 일반적인 추정치를 사용한 것으로, 실제 상황에 따라 다를 수 있습니다.
             더 정확한 계산을 위해서는 지역별, 상황별 특성을 고려한 세부적인 데이터가 필요합니다.
             """)
-            
-            # 결과 저장
-            save_user_data({
-                "date": datetime.now().strftime("%Y-%m-%d"),
-                "footprint": footprint,
-                "breakdown": footprint_breakdown
-            })
-
-            # 추가 정보 제공
-            st.info("이 계산은 대략적인 추정치입니다. 정확한 탄소 발자국 계산을 위해서는 더 자세한 생활 습관 분석이 필요합니다.")
-
 
     with tabs[1]:  # 히스토리 탭
-        st.subheader("탄소 발자국 히스토리")
+        st.subheader("📊 탄소 발자국 히스토리")
         user_data = load_user_data()
         if user_data:
             df = pd.DataFrame(user_data)
             fig = px.line(df, x="date", y="footprint", title="탄소 발자국 변화 추이")
             st.plotly_chart(fig)
+
+            # 항목별 추이 그래프
+            categories = ["transportation", "energy_usage", "food_habits", "consumer_goods", "waste"]
+            fig = go.Figure()
+            for category in categories:
+                fig.add_trace(go.Scatter(x=df["date"], y=df[category], mode='lines+markers', name=category))
+            fig.update_layout(title="항목별 사용량 추이", xaxis_title="날짜", yaxis_title="사용량")
+            st.plotly_chart(fig)
+
+            # 데이터 테이블 표시
+            st.subheader("상세 데이터")
+            st.dataframe(df)
         else:
             st.write("아직 저장된 데이터가 없습니다.")
 
     with tabs[2]:  # 통계 탭
-        st.subheader("탄소 발자국 통계")
+        st.subheader("📈 탄소 발자국 통계")
         user_data = load_user_data()
         if user_data:
             df = pd.DataFrame(user_data)
@@ -199,6 +212,16 @@ def show():
 
             # 탄소 발자국 분포 히스토그램
             fig = px.histogram(df, x="footprint", nbins=20, title="탄소 발자국 분포")
+            st.plotly_chart(fig)
+
+            # 항목별 평균 기여도
+            avg_breakdown = df[["transportation", "energy_usage", "food_habits", "consumer_goods", "waste"]].mean()
+            fig = px.pie(values=avg_breakdown.values, names=avg_breakdown.index, title="항목별 평균 기여도")
+            st.plotly_chart(fig)
+
+            # 상관관계 히트맵
+            corr_matrix = df[["footprint", "transportation", "energy_usage", "food_habits", "consumer_goods", "waste"]].corr()
+            fig = px.imshow(corr_matrix, title="항목간 상관관계")
             st.plotly_chart(fig)
         else:
             st.write("아직 저장된 데이터가 없습니다.")
