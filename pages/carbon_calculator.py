@@ -51,7 +51,7 @@ def calculate_carbon_footprint(transportation, energy_usage, food_habits, consum
 # AI를 이용한 맞춤형 팁 제공 함수
 def get_emission_reduction_tips(footprint, transportation, energy_usage, food_habits, consumer_goods, waste):
     prompt = f"""
-    개인의 탄소 발자국 정보:
+    당신의 탄소 발자국 정보:
     - 총 탄소 발자국: {footprint:.2f} 톤 CO2e
     - 교통: {transportation} km/주 (자동차 사용)
     - 에너지 사용: {energy_usage} kWh/월 (4인 가구 기준)
@@ -59,8 +59,8 @@ def get_emission_reduction_tips(footprint, transportation, energy_usage, food_ha
     - 소비재: 월 {consumer_goods}회 새 물건 구매
     - 폐기물: 주 {waste}kg 재활용하지 않는 쓰레기
 
-    위 정보를 바탕으로, 이 개인이 탄소 발자국을 줄이기 위해 실천할 수 있는 구체적이고 실용적인 팁 5가지를 제공해주세요. 
-    각 팁은 간결하고 실행 가능해야 하며, 개인의 현재 상황을 고려해야 합니다.
+    위 정보를 바탕으로, 이 사람의 탄소 발자국을 줄이기 위해 실천할 수 있는 구체적이고 실용적인 팁 5가지를 제공해주세요. 
+    각 팁은 간결하고 실행 가능해야 하며, 이 사람의 현재 상황을 고려해야 합니다.
     """
 
     headers = {
