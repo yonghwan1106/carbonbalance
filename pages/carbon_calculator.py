@@ -72,7 +72,7 @@ def get_emission_reduction_tips(footprint, transportation, energy_usage, food_ha
         "model": MODEL,
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.7,
-        "max_tokens": 300
+        "max_tokens": 1000
     }
 
     response = requests.post(API_URL, headers=headers, json=data)
@@ -139,7 +139,7 @@ def show():
             # 비교 시각화
             fig = px.bar(x=['Your Footprint', 'Region Average'], y=[footprint, region_average],
                          labels={'x': '', 'y': 'Carbon Footprint (tons CO2e)'},
-                         title='Your Carbon Footprint vs Region Average')
+                         title='당신의 탄소발자국 vs 지역 평균')
             st.plotly_chart(fig)
 
             # AI 맞춤형 팁 제공
