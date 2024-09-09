@@ -139,7 +139,7 @@ def show():
             # 비교 시각화
             fig = px.bar(x=['Your Footprint', 'Region Average'], y=[footprint, region_average],
                          labels={'x': '', 'y': 'Carbon Footprint (tons CO2e)'},
-                         title='Your Carbon Footprint vs Region Average')
+                         title='당신의 탄소발자국 vs 지역 탄소발자국 평균')
             st.plotly_chart(fig)
 
             # AI 맞춤형 팁 제공
