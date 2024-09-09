@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -6,11 +5,15 @@ import plotly.graph_objects as go
 import sys
 import os
 from datetime import datetime
+import requests
 
 # 프로젝트 루트 디렉토리를 sys.path에 추가
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from utils.ai_helper import get_emission_reduction_tips
+# Groq API 설정
+MODEL = "llama-3.1-70b-versatile"
+API_URL = "https://api.groq.com/openai/v1/chat/completions"
+GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 
 # 탄소 발자국 계산 함수 개선
 def calculate_carbon_footprint(transportation, energy_usage, food_habits, consumer_goods, waste):
@@ -36,6 +39,39 @@ def calculate_carbon_footprint(transportation, energy_usage, food_habits, consum
         "폐기물": waste_footprint
     }
 
+# AI를 이용한 맞춤형 팁 제공 함수
+def get_emission_reduction_tips(footprint, transportation, energy_usage, food_habits, consumer_goods, waste):
+    prompt = f"""
+    개인의 탄소 발자국 정보:
+    - 총 탄소 발자국: {footprint:.2f} 톤 CO2e
+    - 교통: {transportation} km/주 (자동차 사용)
+    - 에너지 사용: {energy_usage} kWh/월 (4인 가구 기준)
+    - 식습관: 주 {food_habits}회 육류 소비
+    - 소비재: 월 {consumer_goods}회 새 물건 구매
+    - 폐기물: 주 {waste}kg 재활용하지 않는 쓰레기
+
+    위 정보를 바탕으로, 이 개인이 탄소 발자국을 줄이기 위해 실천할 수 있는 구체적이고 실용적인 팁 5가지를 제공해주세요. 
+    각 팁은 간결하고 실행 가능해야 하며, 개인의 현재 상황을 고려해야 합니다.
+    """
+
+    headers = {
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    
+    data = {
+        "model": MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.7,
+        "max_tokens": 300
+    }
+
+    response = requests.post(API_URL, headers=headers, json=data)
+    if response.status_code == 200:
+        return response.json()['choices'][0]['message']['content'].split("\n")
+    else:
+        return ["AI 팁을 가져오는 데 문제가 발생했습니다. 나중에 다시 시도해주세요."]
+
 # 사용자 데이터 저장 및 불러오기 함수
 def save_user_data(data):
     if 'user_data' not in st.session_state:
@@ -55,11 +91,11 @@ def show():
 
     with tabs[0]:  # 계산기 탭
         # 사용자 입력 받기 (기존 항목 + 새로운 항목)
-        transportation = st.slider("교통 (주간 자동차 사용 km)", 0, 1000, 100)
-        energy_usage = st.slider("에너지 사용 (월간 전기 사용량 kWh)", 0, 1000, 300)
-        food_habits = st.slider("식습관 (주간 육류 소비 횟수)", 0, 21, 7)
-        consumer_goods = st.slider("소비재 (월간 새 물건 구매 횟수)", 0, 50, 10)
-        waste = st.slider("폐기물 (주간 재활용하지 않는 쓰레기 kg)", 0, 50, 5)
+        transportation = st.slider("교통 (주간 자동차 사용 km)", 0, 1000, 100, help="평균: 주 250km")
+        energy_usage = st.slider("에너지 사용 (월간 전기 사용량 kWh, 4인 가구 기준)", 0, 1000, 300, help="4인 가구 평균: 월 350kWh")
+        food_habits = st.slider("식습관 (주간 육류 소비 횟수)", 0, 21, 7, help="평균: 주 9회")
+        consumer_goods = st.slider("소비재 (월간 새 물건 구매 횟수)", 0, 50, 10, help="평균: 월 15회")
+        waste = st.slider("폐기물 (주간 재활용하지 않는 쓰레기 kg)", 0, 50, 5, help="평균: 주 7kg")
 
         if st.button("탄소 발자국 계산하기"):
             # 탄소 발자국 계산
@@ -92,12 +128,6 @@ def show():
                          title='Your Carbon Footprint vs Region Average')
             st.plotly_chart(fig)
 
-            # AI를 이용한 맞춤형 팁 제공
-            tips = get_emission_reduction_tips(footprint, transportation, energy_usage, food_habits, consumer_goods)
-            st.subheader("탄소 배출 감소를 위한 맞춤형 팁:")
-            for tip in tips:
-                st.write(f"- {tip}")
-
             # 결과 저장
             save_user_data({
                 "date": datetime.now().strftime("%Y-%m-%d"),
@@ -107,6 +137,14 @@ def show():
 
             # 추가 정보 제공
             st.info("이 계산은 대략적인 추정치입니다. 정확한 탄소 발자국 계산을 위해서는 더 자세한 생활 습관 분석이 필요합니다.")
+
+            # AI 맞춤형 팁 버튼
+            if st.button("탄소 배출 감소를 위한 맞춤형 팁 받기"):
+                with st.spinner("AI가 맞춤형 팁을 생성하고 있습니다..."):
+                    tips = get_emission_reduction_tips(footprint, transportation, energy_usage, food_habits, consumer_goods, waste)
+                st.subheader("탄소 배출 감소를 위한 맞춤형 팁:")
+                for tip in tips:
+                    st.write(f"- {tip}")
 
     with tabs[1]:  # 히스토리 탭
         st.subheader("탄소 발자국 히스토리")
