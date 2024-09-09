@@ -35,11 +35,26 @@ def show_carbon_map():
     st.title("경기도 지자체별 카본 지도 (2022년)")
 
     df = load_data()
-    geojson = load_geojson()
+    gdf = load_geojson()
 
-    if geojson is None:
-        st.error("GeoJSON 데이터를 불러오는 데 실패했습니다. 지도를 표시할 수 없습니다.")
-        return
+    # ShapeFile의 지자체명과 CSV 파일의 지자체명 비교
+    st.subheader("지자체명 비교")
+    st.write("ShapeFile의 지자체명:", gdf['SGG_NM'].tolist())
+    st.write("CSV 파일의 지자체명:", df['지자체명'].tolist())
+
+    # 지자체명 매핑 (예시)
+    name_mapping = {
+        '수원시': '수원시',
+        '성남시': '성남시',
+        '의정부시': '의정부시',
+        # ... 나머지 지자체 매핑을 추가하세요
+    }
+
+    df['매핑된_지자체명'] = df['지자체명'].map(name_mapping)
+    gdf['매핑된_지자체명'] = gdf['SGG_NM'].map(name_mapping)
+
+    # 매핑된 데이터만 사용
+    merged_data = gdf.merge(df, on='매핑된_지자체명', how='inner')
 
     st.subheader("경기도 지자체별 순 탄소 배출량 지도")
     
