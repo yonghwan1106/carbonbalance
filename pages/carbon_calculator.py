@@ -142,31 +142,12 @@ def show():
                          title='당신의 탄소발자국 vs 지역 평균')
             st.plotly_chart(fig)
 
-            # AI 맞춤형 팁 제공 (개선된 디자인)
-            st.markdown("---")
-            st.markdown("<h2 style='text-align: center; color: #2E8B57;'>💡 AI의 탄소 배출 감소를 위한 맞춤형 팁</h2>", unsafe_allow_html=True)
-            
+            # AI 맞춤형 팁 제공
+            st.subheader("💡 AI의 탄소 배출 감소를 위한 맞춤형 팁:")
             with st.spinner("AI가 맞춤형 팁을 생성하고 있습니다..."):
                 tips = get_emission_reduction_tips(footprint, transportation, energy_usage, food_habits, consumer_goods, waste)
-            
-            for i, tip in enumerate(tips, 1):
-                with st.container():
-                    st.markdown(f"""
-                    <div style="
-                        background-color: #E6F3FF;
-                        border-left: 5px solid #2E8B57;
-                        padding: 10px;
-                        margin-bottom: 10px;
-                        border-radius: 5px;
-                    ">
-                        <h3 style="color: #2E8B57;">팁 {i}</h3>
-                        <p>{tip}</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-
-            # 추가 정보 제공
-            st.info("이 팁들은 AI에 의해 생성되었으며, 귀하의 개인 상황에 맞춰 제안되었습니다. 실행 가능성을 고려하여 적용해 보세요.")
-
+            for tip in tips:
+                st.write(f"- {tip}")
 
             # 결과 저장
             save_user_data({
