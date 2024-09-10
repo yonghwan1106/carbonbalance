@@ -2,9 +2,14 @@ import streamlit as st
 import sys
 import os
 import streamlit as st
-from pages import home, basic_info, carbon_calculator, carbon_map, visualization, policy_suggestions, eco_game, marketplace, profile
+from pages import home, basic_info, carbon_calculator, carbon_map, visualization, policy_suggestions, eco_game, marketplace, profile, carbon_credit
 # 아직 개발 중 carbon_credit,  community, challenges, education_hub
-
+from utils.db_manager import init_db
+from pages import marketplace
+    
+    # 데이터베이스 초기화
+    init_db()
+    
 # 프로젝트 루트 디렉토리를 sys.path에 추가
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
