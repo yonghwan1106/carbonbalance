@@ -22,7 +22,8 @@ def show():
     st.title("🙋 내 프로필")
 
     user_data = get_user_data()
-
+    st.write("Debug: User Data", user_data)  # 디버그용 출력
+    
     col1, col2 = st.columns([2, 1])
 
     with col1:
