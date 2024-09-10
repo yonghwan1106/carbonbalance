@@ -32,6 +32,29 @@ def make_choice(options, results):
     st.write(result[0])
     return result[1], result[2]
 
+def show_image(choice):
+    images = {
+        "LED 조명으로 교체하기": "images/led.png",
+        "에어컨 온도 낮추기": "images/aircon.png",
+        "전기 난방 사용하기": "images/heating.png",
+        "자전거": "images/bike.png",
+        "대중교통": "images/bus.png",
+        "자동차": "images/car.png",
+        "비행기": "images/plane.png",
+        "채식 식단": "images/vegetarian.png",
+        "현지 음식": "images/local_food.png",
+        "육류 중심 식단": "images/meat.png"
+    }
+    
+    image_path = images.get(choice)
+    if image_path:
+        st.image(image_path, width=300)
+
+# 사용 예시
+choice = st.selectbox("당신의 선택:", ["LED 조명으로 교체하기", "에어컨 온도 낮추기", "전기 난방 사용하기"])
+show_image(choice)
+
+
 while carbon_footprint > 0 and carbon_footprint < 200:
     st.subheader(level_description(level))
     
