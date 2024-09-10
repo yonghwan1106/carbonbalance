@@ -8,8 +8,6 @@ from pages import home, basic_info, carbon_calculator, carbon_map, visualization
 # 프로젝트 루트 디렉토리를 sys.path에 추가
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-# 페이지 설정
-st.set_page_config(page_title="Carbon Footprint Korea", layout="wide")
 
 def main():
     st.set_page_config(page_title="Carbon Footprint Korea", page_icon="🍃", layout="wide")
