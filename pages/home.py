@@ -5,14 +5,15 @@ import sys
 import urllib.request
 import urllib.parse
 import json
+import re
 from utils.data_processor import get_latest_national_data
 from utils.ai_helper import get_daily_eco_tip
 
 def get_naver_news(query):
-    client_id = "SszOvSXjnNOyqfiX_DVz"  # 여기에 직접 Client ID를 넣었습니다
-    client_secret = "eJlQoCzJkX"  # 여기에 직접 Client Secret을 넣었습니다
+    client_id = "SszOvSXjnNOyqfiX_DVz"
+    client_secret = "eJlQoCzJkX"
     encText = urllib.parse.quote(query)
-    url = f"https://openapi.naver.com/v1/search/news.json?query={encText}&display=5&start=1&sort=date"
+    url = f"https://openapi.naver.com/v1/search/news.json?query={encText}&display=10&start=1&sort=date"
 
     request = urllib.request.Request(url)
     request.add_header("X-Naver-Client-Id", client_id)
@@ -28,6 +29,26 @@ def get_naver_news(query):
             raise Exception(f"Error Code: {rescode}")
     except Exception as e:
         raise Exception(f"API 호출 실패: {str(e)}")
+
+def refine_news(news_data, keyword):
+    refined_news = []
+    seen_titles = set()
+    
+    for item in news_data['items']:
+        title = re.sub('<.*?>', '', item['title'])  # HTML 태그 제거
+        if keyword in title and title not in seen_titles:
+            description = re.sub('<.*?>', '', item['description'])  # HTML 태그 제거
+            refined_news.append({
+                'title': title,
+                'description': description[:100] + '...' if len(description) > 100 else description,
+                'link': item['link']
+            })
+            seen_titles.add(title)
+        
+        if len(refined_news) == 3:  # 최대 3개의 뉴스만 표시
+            break
+    
+    return refined_news
 
 def show():
     st.title("🍃 Carbon Footprint Korea")
@@ -59,17 +80,26 @@ def show():
         st.write("여러분의 노력을 크레딧으로 보상받고 거래해보세요.")
         if st.button("마켓플레이스"):
             st.switch_page("pages/marketplace.py")
-
+      
+    # 일일 에코 팁
+    st.header("🌱 오늘의 에코 팁")
+    daily_tip = get_daily_eco_tip()
+    st.info(daily_tip)
+     
     # 최신 뉴스 또는 업데이트
     st.header("📰 최신 탄소 중립 소식")
     try:
-        news_data = get_naver_news("탄소 중립")  # 여기에 '탄소 중립' 키워드를 넣었습니다
+        news_data = get_naver_news("탄소 중립")
+        refined_news = refine_news(news_data, "탄소 중립")
         
-        for item in news_data['items']:
-            st.subheader(item['title'])
-            st.write(item['description'])
-            st.write(f"[기사 보기]({item['link']})")
-            st.write("---")
+        if refined_news:
+            for item in refined_news:
+                st.subheader(item['title'])
+                st.write(item['description'])
+                st.write(f"[기사 보기]({item['link']})")
+                st.write("---")
+        else:
+            st.write("관련 뉴스를 찾을 수 없습니다.")
     except Exception as e:
         st.error(f"뉴스를 가져오는 중 오류가 발생했습니다: {str(e)}")
         st.write("대체 뉴스:")
@@ -81,12 +111,6 @@ def show():
         for item in news_items:
             st.write(f"• {item}")
 
-          
-    # 일일 에코 팁
-    st.header("🌱 오늘의 에코 팁")
-    daily_tip = get_daily_eco_tip()
-    st.info(daily_tip)
-     
     # 사용자 참여 유도
     st.header("함께 만들어가는 녹색 미래")
     st.write("여러분의 작은 실천이 큰 변화를 만듭니다. 지금 시작해보세요!")
