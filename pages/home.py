@@ -9,7 +9,7 @@ from utils.data_processor import get_latest_national_data
 from utils.ai_helper import get_daily_eco_tip
 
 def get_naver_news(query, client_id, client_secret):
-    encText = urllib.parse.quote(탄소 중립)
+    encText = urllib.parse.quote(query)
     url = f"https://openapi.naver.com/v1/search/news.json?query={encText}&display=3&start=1&sort=date"
 
     request = urllib.request.Request(url)
