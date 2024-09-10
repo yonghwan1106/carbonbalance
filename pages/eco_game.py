@@ -36,9 +36,9 @@ def make_choice(options, results):
 
 def show_image(choice):
     images = {
-        "LED 조명으로 교체하기": "images/led.png",
-        "에어컨 온도 낮추기": "images/aircon.png",
-        "전기 난방 사용하기": "images/heating.png",
+        "LED 조명으로 교체하기": "./images/led.png",
+        "에어컨 온도 낮추기": "./images/aircon.png",
+        "전기 난방 사용하기": "./images/heating.png",
         "자전거": "images/bike.png",
         "대중교통": "images/bus.png",
         "자동차": "images/car.png",
