@@ -8,3 +8,4 @@ shapely
 fiona
 sqlalchemy
 psycopg2-binary
+python-dotenv==0.20.0
