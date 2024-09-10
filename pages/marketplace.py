@@ -22,7 +22,6 @@ def execute_transaction(user_id, transaction_type, amount):
             credit_id = manager.issue_credit(amount, user_id)
             st.success(f"{amount} 크레딧이 성공적으로 구매되었습니다. 크레딧 ID: {credit_id}")
         elif transaction_type == "sell":
-            # 사용자의 크레딧 중 첫 번째 것을 사용 (실제로는 더 복잡한 로직이 필요할 수 있습니다)
             user_credits = [credit for credit in manager.credits.values() if credit.owner == user_id and credit.is_active]
             if user_credits:
                 credit_to_sell = user_credits[0]
@@ -36,6 +35,26 @@ def execute_transaction(user_id, transaction_type, amount):
         return False
 
 st.title("💰 탄소 크레딧 거래")
+
+# 탄소 크레딧 설명 추가
+with st.expander("탄소 크레딧이란?"):
+    st.write("""
+    탄소 크레딧은 온실가스 배출량을 줄이거나 제거하는 노력을 수치화한 것입니다. 
+    1 탄소 크레딧은 일반적으로 1톤의 이산화탄소 또는 이에 상응하는 다른 온실가스의 감축을 나타냅니다.
+
+    **탄소 크레딧의 개념:**
+    - 기업이나 개인이 온실가스 배출을 줄이면 크레딧을 얻습니다.
+    - 배출 목표를 초과 달성한 경우, 초과분을 크레딧으로 받아 다른 기업에 판매할 수 있습니다.
+    - 반대로, 배출 목표를 달성하지 못한 기업은 크레딧을 구매하여 부족분을 보완할 수 있습니다.
+
+    **거래 방식:**
+    1. 자발적 시장: 기업이나 개인이 자발적으로 참여하는 시장입니다.
+    2. 규제 시장: 정부 규제에 따라 의무적으로 참여해야 하는 시장입니다.
+
+    탄소 크레딧 거래는 온실가스 감축을 경제적으로 유도하고, 
+    전 세계적으로 효율적인 탄소 감축을 달성하는 데 도움을 줍니다.
+    """)
+
 st.write("여러분의 노력을 크레딧으로 보상받고 거래해보세요.")
 
 # 사용자 선택
@@ -74,3 +93,12 @@ else:
 
 # 만료된 크레딧 처리
 manager.expire_credits()
+
+# 추가 정보
+st.sidebar.header("💡 알고 계셨나요?")
+st.sidebar.info("""
+- 전 세계적으로 탄소 크레딧 시장의 규모는 계속 성장하고 있습니다.
+- 많은 기업들이 탄소 중립을 목표로 하고 있으며, 이를 위해 탄소 크레딧을 활용합니다.
+- 개인도 일상생활에서의 탄소 감축 노력을 통해 크레딧을 얻을 수 있습니다.
+- 탄소 크레딧 거래는 환경 보호와 경제적 이익을 동시에 추구할 수 있는 방법입니다.
+""")
