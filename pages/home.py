@@ -39,7 +39,7 @@ def show():
     st.header("🇰🇷 대한민국 최신 탄소 배출 현황")
     national_data = get_latest_national_data()
     st.metric(label="총 탄소 배출량", value=f"{national_data['total_emissions']:,} 톤 CO2e",
-              delta=f"{national_data['emissions_change']}% 전년 대비")
+              delta=f"{(national_data['emissions_change'],0)}% 전년 대비")
     
     # 일일 에코 팁
     st.header("🌱 오늘의 에코 팁")
