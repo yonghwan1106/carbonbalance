@@ -3,26 +3,29 @@ import pandas as pd
 import os
 import sys
 import urllib.request
-import requests
+import urllib.parse
 import json
 from utils.data_processor import get_latest_national_data
 from utils.ai_helper import get_daily_eco_tip
 
 def get_naver_news(query, client_id, client_secret):
-    encText = urllib.parse.quote(query)
+    encText = urllib.parse.quote(탄소 중립)
     url = f"https://openapi.naver.com/v1/search/news.json?query={encText}&display=3&start=1&sort=date"
 
-    headers = {
-        "X-Naver-Client-Id": client_id,
-        "X-Naver-Client-Secret": client_secret
-    }
-
-    response = requests.get(url, headers=headers)
+    request = urllib.request.Request(url)
+    request.add_header("SszOvSXjnNOyqfiX_DVz", client_id)
+    request.add_header("eJlQoCzJkX", client_secret)
     
-    if response.status_code == 200:
-        return json.loads(response.text)
-    else:
-        raise Exception(f"API 호출 실패: {response.status_code}")
+    try:
+        response = urllib.request.urlopen(request)
+        rescode = response.getcode()
+        if rescode == 200:
+            response_body = response.read()
+            return json.loads(response_body.decode('utf-8'))
+        else:
+            raise Exception(f"Error Code: {rescode}")
+    except Exception as e:
+        raise Exception(f"API 호출 실패: {str(e)}")
 
 def show():
     st.title("🍃 Carbon Footprint Korea")
@@ -63,8 +66,8 @@ def show():
     # 최신 뉴스 또는 업데이트
     st.header("📰 최신 탄소 중립 소식")
     try:
-        client_id = st.secrets["SszOvSXjnNOyqfiX_DVz"]
-        client_secret = st.secrets["eJlQoCzJkX"]
+        client_id = st.secrets["NAVER_CLIENT_ID"]
+        client_secret = st.secrets["NAVER_CLIENT_SECRET"]
         news_data = get_naver_news("탄소 중립", client_id, client_secret)
         
         for item in news_data['items']:
