@@ -58,7 +58,7 @@ while carbon_footprint > 0 and carbon_footprint < 200:
     st.subheader(level_description(level))
     
     if level == 1:
-        options = ["LED 조명으로 교체하기", "에어컨 온도 낮추기", "전기 난방 사용하기"]
+        options = ["LED 조명으로 교체하기", "에어컨 온도 낮추기", "전기 난방 사용하기", "자전거", "대중교통", "비행기", "채식 식단", "육류 중심 식단"]
         results = {
             "LED 조명으로 교체하기": ("탄소 배출량을 줄였습니다!", -10, 15),
             "에어컨 온도 낮추기": ("에어컨 사용으로 탄소 배출이 증가했습니다.", 5, -5),
