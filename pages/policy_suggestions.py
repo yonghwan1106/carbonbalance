@@ -8,7 +8,7 @@ import json
 
 # 프로젝트 루트 디렉토리를 sys.path에 추가
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils.data_processor import load_gyeonggi_data, analyze_emissions_trend
+from utils.data_processor import analyze_emissions_trend
 
 # Groq API 설정
 MODEL = "llama-3.1-70b-versatile"
