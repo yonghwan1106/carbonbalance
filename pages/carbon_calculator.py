@@ -61,6 +61,7 @@ def get_emission_reduction_tips(footprint, transportation, energy_usage, food_ha
 
     위 정보를 바탕으로, 당신의 탄소 발자국을 줄이기 위해 실천할 수 있는 구체적이고 실용적인 팁 5가지를 제공해주세요. 
     각 팁은 간결하고 실행 가능해야 하며, 당신의 현재 상황을 고려해야 합니다.
+    천천히 답변해도 좋으니, 모든 답변 내용을 리뷰해서 100퍼센트 한글로만 답변해 주세요.
     """
 
     headers = {
