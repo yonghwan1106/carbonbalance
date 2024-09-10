@@ -1,9 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from config import DATABASE_URL
-from models.user import User
-from models.credit import Credit
-from models.credit import Base as CreditBase
+from ..models.user import User
+from ..models.credit import Credit
+from ..models.credit import Base as CreditBase
 
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
