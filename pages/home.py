@@ -57,10 +57,7 @@ def show():
     client_id = "SszOvSXjnNOyqfiX_DVz"
     client_secret = "eJlQoCzJkX"
     encText = urllib.parse.quote("탄소 중립")
-    url = 
-    "https://openapi.naver.com/v1/search/blog.json?query=%EB%A6%AC%EB%B7%B0&display=10&start=1&sort=sim" + encText # JSON 결과
-
-
+    url = "https://openapi.naver.com/v1/search/blog.json?query=%EB%A6%AC%EB%B7%B0&display=10&start=1&sort=sim" + encText # JSON 결과
 
     request = urllib.request.Request(url)
     request.add_header("X-Naver-Client-Id",client_id)
