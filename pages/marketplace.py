@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 from utils.credit_manager import CreditManager
@@ -50,7 +49,14 @@ st.write(f"현재 보유 크레딧: {user_credits} 크레딧")
 # 거래 섹션
 st.subheader("크레딧 거래")
 transaction_type = st.selectbox("거래 유형 선택", ["buy", "sell"])
-amount = st.number_input("거래할 크레딧 양", min_value=1, max_value=user_credits if transaction_type == "sell" else 1000, value=1)
+
+# max_value를 조건부로 설정
+if transaction_type == "sell":
+    max_value = min(int(user_credits), 1000)  # user_credits와 1000 중 작은 값
+else:
+    max_value = 1000
+
+amount = st.number_input("거래할 크레딧 양", min_value=1, max_value=max_value, value=1)
 
 if st.button("거래 실행"):
     if execute_transaction(user_id, transaction_type, amount):
