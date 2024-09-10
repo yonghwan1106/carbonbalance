@@ -1,111 +1,120 @@
 import streamlit as st
 import pandas as pd
 from utils.credit_manager import CreditManager
+from utils.auth_manager import authenticate_user, create_token, verify_token
+from utils.db_manager import get_db_session
+from models.user import User
 
-# CreditManager 인스턴스 생성
-manager = CreditManager()
+def show():
+    st.title("💰 탄소 크레딧 거래")
 
-def get_user_credits(user_id):
-    return manager.get_credit_balance(user_id)
+    # 로그인 상태 확인
+    if 'user_id' not in st.session_state:
+        show_login()
+    else:
+        show_marketplace(st.session_state.user_id)
 
-def get_transaction_history(user_id):
-    transactions = manager.get_transaction_history(user_id)
-    df = pd.DataFrame(transactions)
-    if not df.empty:
-        df['date'] = pd.to_datetime(df['date'])
-        df = df.sort_values('date', ascending=False)
-    return df
+def show_login():
+    st.subheader("로그인")
+    username = st.text_input("사용자명")
+    password = st.text_input("비밀번호", type="password")
+    if st.button("로그인"):
+        user = authenticate_user(username, password)
+        if user:
+            token = create_token(user.id)
+            st.session_state.user_id = user.id
+            st.session_state.token = token
+            st.success("로그인 성공!")
+            st.experimental_rerun()
+        else:
+            st.error("잘못된 사용자명 또는 비밀번호입니다.")
 
-def execute_transaction(user_id, transaction_type, amount):
-    try:
-        if transaction_type == "buy":
-            credit_id = manager.issue_credit(amount, user_id)
-            st.success(f"{amount} 크레딧이 성공적으로 구매되었습니다. 크레딧 ID: {credit_id}")
-        elif transaction_type == "sell":
-            user_credits = [credit for credit in manager.credits.values() if credit.owner == user_id and credit.is_active]
-            if user_credits:
-                credit_to_sell = user_credits[0]
-                manager.retire_credit(credit_to_sell.id, amount)
-                st.success(f"{amount} 크레딧이 성공적으로 판매되었습니다.")
-            else:
-                st.error("판매할 크레딧이 없습니다.")
-        return True
-    except ValueError as e:
-        st.error(f"거래 실패: {str(e)}")
-        return False
+def show_marketplace(user_id):
+    # 탄소 크레딧 설명 추가
+    with st.expander("탄소 크레딧이란?"):
+        st.write("""
+        탄소 크레딧은 온실가스 배출량을 줄이거나 제거하는 노력을 수치화한 것입니다. 
+        1 탄소 크레딧은 일반적으로 1톤의 이산화탄소 또는 이에 상응하는 다른 온실가스의 감축을 나타냅니다.
 
-st.title("💰 탄소 크레딧 거래")
+        **탄소 크레딧의 개념:**
+        - 기업이나 개인이 온실가스 배출을 줄이면 크레딧을 얻습니다.
+        - 배출 목표를 초과 달성한 경우, 초과분을 크레딧으로 받아 다른 기업에 판매할 수 있습니다.
+        - 반대로, 배출 목표를 달성하지 못한 기업은 크레딧을 구매하여 부족분을 보완할 수 있습니다.
 
-# 탄소 크레딧 설명 추가
-with st.expander("탄소 크레딧이란?"):
-    st.write("""
-    탄소 크레딧은 온실가스 배출량을 줄이거나 제거하는 노력을 수치화한 것입니다. 
-    1 탄소 크레딧은 일반적으로 1톤의 이산화탄소 또는 이에 상응하는 다른 온실가스의 감축을 나타냅니다.
+        **거래 방식:**
+        1. 자발적 시장: 기업이나 개인이 자발적으로 참여하는 시장입니다.
+        2. 규제 시장: 정부 규제에 따라 의무적으로 참여해야 하는 시장입니다.
 
-    **탄소 크레딧의 개념:**
-    - 기업이나 개인이 온실가스 배출을 줄이면 크레딧을 얻습니다.
-    - 배출 목표를 초과 달성한 경우, 초과분을 크레딧으로 받아 다른 기업에 판매할 수 있습니다.
-    - 반대로, 배출 목표를 달성하지 못한 기업은 크레딧을 구매하여 부족분을 보완할 수 있습니다.
+        탄소 크레딧 거래는 온실가스 감축을 경제적으로 유도하고, 
+        전 세계적으로 효율적인 탄소 감축을 달성하는 데 도움을 줍니다.
+        """)
 
-    **거래 방식:**
-    1. 자발적 시장: 기업이나 개인이 자발적으로 참여하는 시장입니다.
-    2. 규제 시장: 정부 규제에 따라 의무적으로 참여해야 하는 시장입니다.
+    st.write("여러분의 노력을 크레딧으로 보상받고 거래해보세요.")
 
-    탄소 크레딧 거래는 온실가스 감축을 경제적으로 유도하고, 
-    전 세계적으로 효율적인 탄소 감축을 달성하는 데 도움을 줍니다.
+    # 사용자 크레딧 현황
+    user_credits = CreditManager.get_credit_balance(user_id)
+    st.subheader("보유 탄소 크레딧")
+    st.write(f"현재 보유 크레딧: {user_credits} 크레딧")
+
+    # 거래 섹션
+    st.subheader("크레딧 거래")
+    transaction_type = st.selectbox("거래 유형 선택", ["buy", "sell"])
+
+    if transaction_type == "sell":
+        if user_credits > 0:
+            max_value = min(int(user_credits), 1000)
+            amount = st.number_input("거래할 크레딧 양", min_value=1, max_value=max_value, value=1)
+        else:
+            st.warning("판매할 크레딧이 없습니다.")
+            amount = 0
+    else:
+        max_value = 1000
+        amount = st.number_input("거래할 크레딧 양", min_value=1, max_value=max_value, value=1)
+
+    if st.button("거래 실행"):
+        if amount > 0:
+            try:
+                if transaction_type == "buy":
+                    credit_id = CreditManager.issue_credit(amount, user_id)
+                    st.success(f"{amount} 크레딧이 성공적으로 구매되었습니다. 크레딧 ID: {credit_id}")
+                else:  # sell
+                    CreditManager.retire_credit(user_id, amount)
+                    st.success(f"{amount} 크레딧이 성공적으로 판매되었습니다.")
+                
+                # 거래 후 업데이트된 크레딧 현황
+                user_credits = CreditManager.get_credit_balance(user_id)
+                st.write(f"현재 보유 크레딧: {user_credits} 크레딧")
+            except ValueError as e:
+                st.error(f"거래 실패: {str(e)}")
+        else:
+            st.error("거래할 크레딧 양을 입력해주세요.")
+
+    # 거래 내역 확인
+    st.subheader("거래 내역")
+    transaction_history = CreditManager.get_transaction_history(user_id)
+    if transaction_history:
+        df = pd.DataFrame(transaction_history)
+        st.write(df)
+    else:
+        st.write("거래 내역이 없습니다.")
+
+    # 로그아웃 버튼
+    if st.button("로그아웃"):
+        del st.session_state.user_id
+        del st.session_state.token
+        st.experimental_rerun()
+
+    # 만료된 크레딧 처리
+    CreditManager.expire_credits()
+
+    # 추가 정보
+    st.sidebar.header("💡 알고 계셨나요?")
+    st.sidebar.info("""
+    - 전 세계적으로 탄소 크레딧 시장의 규모는 계속 성장하고 있습니다.
+    - 많은 기업들이 탄소 중립을 목표로 하고 있으며, 이를 위해 탄소 크레딧을 활용합니다.
+    - 개인도 일상생활에서의 탄소 감축 노력을 통해 크레딧을 얻을 수 있습니다.
+    - 탄소 크레딧 거래는 환경 보호와 경제적 이익을 동시에 추구할 수 있는 방법입니다.
     """)
 
-st.write("여러분의 노력을 크레딧으로 보상받고 거래해보세요.")
-
-# 사용자 선택
-user_id = st.text_input("사용자 ID를 입력하세요:", value="user123")
-
-# 사용자 크레딧 현황
-user_credits = get_user_credits(user_id)
-st.subheader("보유 탄소 크레딧")
-st.write(f"현재 보유 크레딧: {user_credits} 크레딧")
-
-# 거래 섹션
-st.subheader("크레딧 거래")
-transaction_type = st.selectbox("거래 유형 선택", ["buy", "sell"])
-
-# max_value를 조건부로 설정
-if transaction_type == "sell":
-    if user_credits > 0:
-        max_value = min(int(user_credits), 1000)
-        amount = st.number_input("거래할 크레딧 양", min_value=1, max_value=max_value, value=1)
-    else:
-        st.warning("판매할 크레딧이 없습니다.")
-        amount = 0
-else:
-    max_value = 1000
-    amount = st.number_input("거래할 크레딧 양", min_value=1, max_value=max_value, value=1)
-
-if st.button("거래 실행"):
-    if amount > 0:
-        if execute_transaction(user_id, transaction_type, amount):
-            # 거래 후 업데이트된 크레딧 현황
-            user_credits = get_user_credits(user_id)
-            st.write(f"현재 보유 크레딧: {user_credits} 크레딧")
-    else:
-        st.error("거래할 크레딧 양을 입력해주세요.")
-
-# 거래 내역 확인
-st.subheader("거래 내역")
-transaction_history = get_transaction_history(user_id)
-if not transaction_history.empty:
-    st.write(transaction_history)
-else:
-    st.write("거래 내역이 없습니다.")
-
-# 만료된 크레딧 처리
-manager.expire_credits()
-
-# 추가 정보
-st.sidebar.header("💡 알고 계셨나요?")
-st.sidebar.info("""
-- 전 세계적으로 탄소 크레딧 시장의 규모는 계속 성장하고 있습니다.
-- 많은 기업들이 탄소 중립을 목표로 하고 있으며, 이를 위해 탄소 크레딧을 활용합니다.
-- 개인도 일상생활에서의 탄소 감축 노력을 통해 크레딧을 얻을 수 있습니다.
-- 탄소 크레딧 거래는 환경 보호와 경제적 이익을 동시에 추구할 수 있는 방법입니다.
-""")
+if __name__ == "__main__":
+    show()
