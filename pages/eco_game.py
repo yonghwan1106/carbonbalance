@@ -1,6 +1,7 @@
 import streamlit as st
 import random
 import time
+import os   
 
 # 초기 설정
 st.title("Eco Game: 탄소중립을 위한 도전")
