@@ -5,7 +5,6 @@ import sys
 import urllib.request
 import urllib.parse
 import json
-import re
 from utils.data_processor import get_latest_national_data
 from utils.ai_helper import get_daily_eco_tip
 
@@ -13,7 +12,7 @@ def get_naver_news(query):
     client_id = "SszOvSXjnNOyqfiX_DVz"
     client_secret = "eJlQoCzJkX"
     encText = urllib.parse.quote(query)
-    url = f"https://openapi.naver.com/v1/search/news.json?query={encText}&display=20&start=1&sort=date"
+    url = f"https://openapi.naver.com/v1/search/news.json?query={encText}&display=3&start=1&sort=date"
 
     request = urllib.request.Request(url)
     request.add_header("X-Naver-Client-Id", client_id)
@@ -29,26 +28,6 @@ def get_naver_news(query):
             raise Exception(f"Error Code: {rescode}")
     except Exception as e:
         raise Exception(f"API 호출 실패: {str(e)}")
-
-def refine_news(news_data, keywords):
-    refined_news = []
-    seen_titles = set()
-    
-    for item in news_data['items']:
-        title = re.sub('<.*?>', '', item['title'])  # HTML 태그 제거
-        if any(keyword in title for keyword in keywords) and title not in seen_titles:
-            description = re.sub('<.*?>', '', item['description'])  # HTML 태그 제거
-            refined_news.append({
-                'title': title,
-                'description': description[:100] + '...' if len(description) > 100 else description,
-                'link': item['link']
-            })
-            seen_titles.add(title)
-        
-        if len(refined_news) == 3:  # 최대 3개의 뉴스만 표시
-            break
-    
-    return refined_news
 
 def show():
     st.title("🍃 Carbon Footprint Korea")
@@ -89,18 +68,13 @@ def show():
     # 최신 뉴스 또는 업데이트
     st.header("📰 최신 탄소 중립 소식")
     try:
-        news_data = get_naver_news("탄소중립 OR 기후변화 OR 신재생에너지")
-        refined_news = refine_news(news_data, ["탄소", "기후", "에너지", "환경"])
+        news_data = get_naver_news("탄소 중립")  # 여기에 '탄소 중립' 키워드를 넣었습니다
         
-        if refined_news:
-            for item in refined_news:
-                st.subheader(item['title'])
-                st.write(item['description'])
-                st.write(f"[기사 보기]({item['link']})")
-                st.write("---")
-        else:
-            st.write("관련 뉴스를 찾을 수 없습니다. 잠시 후 다시 시도해 주세요.")
-            st.write("뉴스 검색 결과:", news_data)  # 디버깅용 출력
+        for item in news_data['items']:
+            st.subheader(item['title'])
+            st.write(item['description'])
+            st.write(f"[기사 보기]({item['link']})")
+            st.write("---")
     except Exception as e:
         st.error(f"뉴스를 가져오는 중 오류가 발생했습니다: {str(e)}")
         st.write("대체 뉴스:")
