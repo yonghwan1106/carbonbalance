@@ -2,8 +2,7 @@ import streamlit as st
 import sys
 import os
 import streamlit as st
-from pages import home, basic_info, carbon_calculator, carbon_map, visualization, policy_suggestions, eco_game
-# carbon_credit, marketplace, profile, community, challenges, education_hub, 
+from pages import home, basic_info, carbon_calculator, carbon_map, visualization, policy_suggestions, eco_game, carbon_credit, marketplace, profile, community, challenges, education_hub, 
 
 # 프로젝트 루트 디렉토리를 sys.path에 추가
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
