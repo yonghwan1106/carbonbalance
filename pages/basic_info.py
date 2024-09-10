@@ -66,5 +66,3 @@ def show_basic_info():
 if __name__ == "__main__":
     show_basic_info()
 
-if __name__ == "__main__":
-    show_basic_info()
