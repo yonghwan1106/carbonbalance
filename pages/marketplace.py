@@ -1,7 +1,10 @@
 import streamlit as st
 import pandas as pd
 import random
+from utils.credit_manager import CreditManager
 
+# CreditManager 사용
+manager = CreditManager()
 # 예제 데이터
 def get_user_credits(user_id):
     # 실제로는 데이터베이스에서 조회하거나 API를 호출해야 합니다.
