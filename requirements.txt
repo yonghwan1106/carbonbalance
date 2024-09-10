@@ -8,3 +8,6 @@ shapely
 fiona
 sqlalchemy
 psycopg2
+pyjwt==2.4.0
+python-dotenv==0.20.0
+werkzeug==2.0.3
