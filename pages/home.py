@@ -1,5 +1,8 @@
 import streamlit as st
 import pandas as pd
+import os
+import sys
+import urllib.request
 from utils.data_processor import get_latest_national_data
 from utils.ai_helper import get_daily_eco_tip
 
@@ -33,18 +36,12 @@ def show():
         st.write("여러분의 노력을 크레딧으로 보상받고 거래해보세요.")
         if st.button("마켓플레이스"):
             st.switch_page("pages/marketplace.py")
-
-    
-    # 최신 국가 데이터
-    st.header("🇰🇷 대한민국 최신 탄소 배출 현황")
-    national_data = get_latest_national_data()
-    st.metric(label="총 탄소 배출량", value=f"{national_data['total_emissions']:,} 톤 CO2e",
-              delta=f"{round(national_data['emissions_change'], 0)}% 전년 대비")
+      
     # 일일 에코 팁
     st.header("🌱 오늘의 에코 팁")
     daily_tip = get_daily_eco_tip()
     st.info(daily_tip)
-    
+     
     # 최신 뉴스 또는 업데이트
     st.header("📰 최신 소식")
     news_items = [
@@ -55,12 +52,39 @@ def show():
     for item in news_items:
         st.write(f"• {item}")
     
+    # 네이버 탄소 중립 최신 뉴스
+
+    client_id = "SszOvSXjnNOyqfiX_DVz"
+    client_secret = "eJlQoCzJkX"
+    encText = urllib.parse.quote("탄소 중립")
+    url = 
+    "https://openapi.naver.com/v1/search/blog.json?query=%EB%A6%AC%EB%B7%B0&display=10&start=1&sort=sim" + encText # JSON 결과
+
+
+
+    request = urllib.request.Request(url)
+    request.add_header("X-Naver-Client-Id",client_id)
+    request.add_header("X-Naver-Client-Secret",client_secret)
+    response = urllib.request.urlopen(request)
+    rescode = response.getcode()
+    if(rescode==200):
+        response_body = response.read()
+        print(response_body.decode('utf-8'))
+    else:
+        print("Error Code:" + rescode)
+
+
     # 사용자 참여 유도
     st.header("함께 만들어가는 녹색 미래")
     st.write("여러분의 작은 실천이 큰 변화를 만듭니다. 지금 시작해보세요!")
     if st.button("도전 과제 참여하기"):
         st.switch_page("pages/challenges.py")
 
+    # 최신 국가 데이터
+    st.header("🇰🇷 대한민국 최신 탄소 배출 현황")
+    national_data = get_latest_national_data()
+    st.metric(label="총 탄소 배출량", value=f"{national_data['total_emissions']:,} 톤 CO2e",
+              delta=f"{national_data['emissions_change']}% 전년 대비")
     
 if __name__ == "__main__":
     show()
