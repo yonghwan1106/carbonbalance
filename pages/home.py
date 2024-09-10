@@ -68,7 +68,7 @@ def show():
     # 최신 뉴스 또는 업데이트
     st.header("📰 최신 탄소 중립 소식")
     try:
-        news_data = get_naver_news("탄소 중립")
+        news_data = get_naver_news("탄소 중립")  # 여기에 '탄소 중립' 키워드를 넣었습니다
         
         for item in news_data['items']:
             st.subheader(item['title'])
