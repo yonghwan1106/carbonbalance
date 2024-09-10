@@ -28,6 +28,7 @@ def level_description(level):
 
 def make_choice(options, results):
     choice = st.selectbox("당신의 선택:", options)
+    show_image(choice)  # 선택한 후 이미지 표시
     result = results.get(choice, ("기본 결과입니다.", 0, 0))
     st.write(result[0])
     return result[1], result[2]
@@ -50,7 +51,6 @@ def show_image(choice):
     if image_path:
         st.image(image_path, width=300)
 
-
 while carbon_footprint > 0 and carbon_footprint < 200:
     st.subheader(level_description(level))
     
@@ -61,11 +61,6 @@ while carbon_footprint > 0 and carbon_footprint < 200:
             "에어컨 온도 낮추기": ("에어컨 사용으로 탄소 배출이 증가했습니다.", 5, -5),
             "전기 난방 사용하기": ("난방 사용으로 탄소 배출이 증가했습니다.", 10, -10)
         }
-        # 사용자의 선택을 받을 수 있는 UI 요소
-        choice = st.selectbox("당신의 선택:", ["LED 조명으로 교체하기", "에어컨 온도 낮추기", "전기 난방 사용하기"])
-        
-        # 사용자의 선택에 따라 이미지를 표시
-        show_image(choice)
 
     elif level == 2:
         options = ["자전거", "대중교통", "자동차", "비행기"]
@@ -104,8 +99,11 @@ while carbon_footprint > 0 and carbon_footprint < 200:
     
     if carbon_footprint <= 0:
         st.success("축하합니다! 탄소중립 목표를 달성했습니다!")
+        break
     elif carbon_footprint >= 200:
         st.error("탄소 배출량이 너무 많습니다! 게임 오버!")
+        break
     
     level += 1
-    time.sleep(1)
+    time.sleep(1)  # 사용자가 다음 레벨로 넘어갈 때 기다리는 시간
+
