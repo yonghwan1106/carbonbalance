@@ -48,8 +48,10 @@ def show_image(choice):
     }
     
     image_path = images.get(choice)
-    if image_path:
+    if image_path and os.path.exists(image_path):
         st.image(image_path, width=300)
+    else:
+        st.write("이미지를 찾을 수 없습니다.")
 
 while carbon_footprint > 0 and carbon_footprint < 200:
     st.subheader(level_description(level))
