@@ -8,8 +8,8 @@ def get_user_data():
         "name": "홍길동",
         "email": "hong@example.com",
         "join_date": "2023-01-01",
-        "carbon_goal": 5000,  # kg CO2e/year
-        "current_carbon": 4500,  # kg CO2e/year
+        "carbon_goal": 5000.0,  # float으로 명시
+        "current_carbon": 4500.0,  # float으로 명시
         "badges": ["초보 환경 지킴이", "대중교통 마스터", "재활용 챔피언"],
         "achievements": [
             {"name": "첫 탄소 저감", "date": "2023-01-15"},
@@ -41,12 +41,14 @@ def show():
     st.subheader("🎯 탄소 감축 목표 및 성과")
     
     if user_data['carbon_goal'] > 0:
-        progress = (user_data['carbon_goal'] - user_data['current_carbon']) / user_data['carbon_goal'] * 100
-        progress = max(0, min(100, progress))  # 진행률을 0에서 100 사이로 제한
-        st.progress(progress)
+        progress = (user_data['carbon_goal'] - user_data['current_carbon']) / user_data['carbon_goal']
+        progress = max(0, min(1, progress))  # 진행률을 0에서 1 사이로 제한
+        progress_percentage = progress * 100  # 백분율로 변환
+        
+        st.progress(progress)  # progress()에는 0에서 1 사이의 값을 전달
         st.write(f"연간 목표: {user_data['carbon_goal']} kg CO2e")
         st.write(f"현재 발자국: {user_data['current_carbon']} kg CO2e")
-        st.write(f"달성률: {progress:.1f}%")
+        st.write(f"달성률: {progress_percentage:.1f}%")
     else:
         st.write("탄소 감축 목표가 설정되지 않았습니다.")
 
