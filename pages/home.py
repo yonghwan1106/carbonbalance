@@ -5,8 +5,14 @@ import sys
 import urllib.request
 import urllib.parse
 import json
+import re
 from utils.data_processor import get_latest_national_data
 from utils.ai_helper import get_daily_eco_tip
+
+def remove_html_tags(text):
+    """HTML 태그를 제거하는 함수"""
+    clean = re.compile('<.*?>')
+    return re.sub(clean, '', text)
 
 def get_naver_news(query):
     client_id = "SszOvSXjnNOyqfiX_DVz"
@@ -68,11 +74,13 @@ def show():
     # 최신 뉴스 또는 업데이트
     st.header("📰 최신 탄소 중립 소식")
     try:
-        news_data = get_naver_news("탄소 중립")  # 여기에 '탄소 중립' 키워드를 넣었습니다
+        news_data = get_naver_news("탄소 중립")
         
         for item in news_data['items']:
-            st.subheader(item['title'])
-            st.write(item['description'])
+            clean_title = remove_html_tags(item['title'])  # HTML 태그 제거
+            clean_description = remove_html_tags(item['description'])  # HTML 태그 제거
+            st.subheader(clean_title)
+            st.write(clean_description)
             st.write(f"[기사 보기]({item['link']})")
             st.write("---")
     except Exception as e:
