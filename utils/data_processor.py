@@ -1,34 +1,37 @@
 import pandas as pd
-import random
+
+# 데이터가 담긴 파일이나 데이터베이스에서 데이터를 읽어오는 함수
+def load_data():
+    # 여기서는 예시로 DataFrame을 직접 생성합니다.
+    # 실제 사용 시에는 데이터 파일을 읽거나 데이터베이스에서 쿼리하는 코드로 대체됩니다.
+    data = {
+        '연도': [2019, 2020, 2021, 2022, 2023],
+        '총탄소배출량': [50000, 52000, 53000, 55000, 57000]
+    }
+    df = pd.DataFrame(data)
+    return df
 
 def get_latest_national_data():
-    """
-    경기도 탄소 배출 데이터를 로드합니다.
-    실제 구현에서는 이 부분에 실제 데이터 파일을 로드하는 코드가 들어갑니다.
-    """
-    # 가상의 데이터 생성 (실제 구현 시 이 부분을 실제 데이터 로딩으로 대체해야 합니다)
-    regions = ['수원시', '성남시', '용인시', '고양시', '부천시', '안산시', '안양시', '평택시', '시흥시', '김포시']
-    years = range(2015, 2024)
+    df = load_data()
     
-    data = []
-    for region in regions:
-        for year in years:
-            emissions = random.randint(1000000, 5000000)  # 가상의 배출량 (단위: tCO2eq)
-            absorption = random.randint(100000, 500000)  # 가상의 흡수량
-            data.append({
-                '지역': region,
-                '연도': year,
-                '탄소배출량': emissions,
-                '탄소흡수량': absorption,
-                '가정': random.randint(100000, 500000),
-                '상업': random.randint(100000, 500000),
-                '산업': random.randint(200000, 1000000),
-                '수송': random.randint(200000, 1000000),
-                '공공': random.randint(50000, 200000),
-                '기타': random.randint(50000, 200000)
-            })
+    # 최신 데이터와 전년 대비 변화량 계산
+    latest_year = df['연도'].max()
+    latest_data = df[df['연도'] == latest_year]
     
-    return pd.DataFrame(data)
+    previous_year = latest_year - 1
+    previous_data = df[df['연도'] == previous_year]
+    
+    total_emissions = latest_data['총탄소배출량'].values[0]
+    
+    emissions_change = 0
+    if not previous_data.empty:
+        previous_emissions = previous_data['총탄소배출량'].values[0]
+        emissions_change = ((total_emissions - previous_emissions) / previous_emissions) * 100
+    
+    return {
+        'total_emissions': total_emissions,
+        'emissions_change': emissions_change
+    }
 
 def analyze_emissions_trend(region_data):
     """
