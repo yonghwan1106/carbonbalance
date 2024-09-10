@@ -47,7 +47,7 @@ def show():
     st.title("🌿 지역 맞춤형 친환경 정책 제안 플랫폼")
 
     # 데이터 로드
-    df = load_gyeonggi_data()
+    # df = load_gyeonggi_data()
 
     # 지역 선택
     regions = df['지역'].unique()
