@@ -3,8 +3,26 @@ import pandas as pd
 import os
 import sys
 import urllib.request
+import requests
+import json
 from utils.data_processor import get_latest_national_data
 from utils.ai_helper import get_daily_eco_tip
+
+def get_naver_news(query, client_id, client_secret):
+    encText = urllib.parse.quote(query)
+    url = f"https://openapi.naver.com/v1/search/news.json?query={encText}&display=3&start=1&sort=date"
+
+    headers = {
+        "X-Naver-Client-Id": client_id,
+        "X-Naver-Client-Secret": client_secret
+    }
+
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code == 200:
+        return json.loads(response.text)
+    else:
+        raise Exception(f"API 호출 실패: {response.status_code}")
 
 def show():
     st.title("🍃 Carbon Footprint Korea")
@@ -43,33 +61,27 @@ def show():
     st.info(daily_tip)
      
     # 최신 뉴스 또는 업데이트
-    st.header("📰 최신 소식")
-    news_items = [
-        "정부, 2050 탄소중립 로드맵 발표",
-        "서울시, 도시 전체 태양광 패널 설치 계획 추진",
-        "기업들의 ESG 경영 확대로 탄소 배출 감소 추세"
-    ]
-    for item in news_items:
-        st.write(f"• {item}")
-    
-    # 네이버 탄소 중립 최신 뉴스
-
-    client_id = "SszOvSXjnNOyqfiX_DVz"
-    client_secret = "eJlQoCzJkX"
-    encText = urllib.parse.quote("탄소 중립")
-    url = "https://openapi.naver.com/v1/search/blog.json?query=%EB%A6%AC%EB%B7%B0&display=10&start=1&sort=sim" + encText # JSON 결과
-
-    request = urllib.request.Request(url)
-    request.add_header("X-Naver-Client-Id",client_id)
-    request.add_header("X-Naver-Client-Secret",client_secret)
-    response = urllib.request.urlopen(request)
-    rescode = response.getcode()
-    if(rescode==200):
-        response_body = response.read()
-        print(response_body.decode('utf-8'))
-    else:
-        print("Error Code:" + rescode)
-
+    st.header("📰 최신 탄소 중립 소식")
+    try:
+        client_id = st.secrets["SszOvSXjnNOyqfiX_DVz"]
+        client_secret = st.secrets["eJlQoCzJkX"]
+        news_data = get_naver_news("탄소 중립", client_id, client_secret)
+        
+        for item in news_data['items']:
+            st.subheader(item['title'])
+            st.write(item['description'])
+            st.write(f"[기사 보기]({item['link']})")
+            st.write("---")
+    except Exception as e:
+        st.error(f"뉴스를 가져오는 중 오류가 발생했습니다: {str(e)}")
+        st.write("대체 뉴스:")
+        news_items = [
+            "정부, 2050 탄소중립 로드맵 발표",
+            "서울시, 도시 전체 태양광 패널 설치 계획 추진",
+            "기업들의 ESG 경영 확대로 탄소 배출 감소 추세"
+        ]
+        for item in news_items:
+            st.write(f"• {item}")
 
     # 사용자 참여 유도
     st.header("함께 만들어가는 녹색 미래")
