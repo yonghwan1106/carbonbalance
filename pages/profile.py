@@ -3,7 +3,6 @@ import pandas as pd
 import plotly.express as px
 from datetime import datetime, timedelta
 
-# 실제 구현 시에는 데이터베이스에서 사용자 정보를 가져와야 합니다.
 def get_user_data():
     return {
         "name": "홍길동",
@@ -40,11 +39,15 @@ def show():
 
     st.subheader("🎯 탄소 감축 목표 및 성과")
     
-    progress = (user_data['carbon_goal'] - user_data['current_carbon']) / user_data['carbon_goal'] * 100
-    st.progress(progress)
-    st.write(f"연간 목표: {user_data['carbon_goal']} kg CO2e")
-    st.write(f"현재 발자국: {user_data['current_carbon']} kg CO2e")
-    st.write(f"달성률: {progress:.1f}%")
+    if user_data['carbon_goal'] > 0:
+        progress = (user_data['carbon_goal'] - user_data['current_carbon']) / user_data['carbon_goal'] * 100
+        progress = max(0, min(100, progress))  # 진행률을 0에서 100 사이로 제한
+        st.progress(progress)
+        st.write(f"연간 목표: {user_data['carbon_goal']} kg CO2e")
+        st.write(f"현재 발자국: {user_data['current_carbon']} kg CO2e")
+        st.write(f"달성률: {progress:.1f}%")
+    else:
+        st.write("탄소 감축 목표가 설정되지 않았습니다.")
 
     # 월별 탄소 발자국 차트 (예시 데이터)
     months = pd.date_range(start="2023-01-01", end="2023-12-31", freq='M')
