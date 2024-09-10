@@ -16,7 +16,7 @@ def main():
             "Education Hub", "Policy Suggestions", "Eco Game"]
     
     if choice == "Home":
-        st.write("이 앱은 당신의 탄소 배출을 관리하고 이해하도록 돕는 사이트입니다.")
+        home.show()
     elif choice == "Basic Info":
         basic_info.show_basic_info()
     elif choice == "Visualization":
