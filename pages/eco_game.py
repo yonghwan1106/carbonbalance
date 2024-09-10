@@ -50,10 +50,6 @@ def show_image(choice):
     if image_path:
         st.image(image_path, width=300)
 
-# 사용 예시
-choice = st.selectbox("당신의 선택:", ["LED 조명으로 교체하기", "에어컨 온도 낮추기", "전기 난방 사용하기"])
-show_image(choice)
-
 
 while carbon_footprint > 0 and carbon_footprint < 200:
     st.subheader(level_description(level))
