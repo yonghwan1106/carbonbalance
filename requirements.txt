@@ -8,6 +8,3 @@ shapely
 fiona
 sqlalchemy
 psycopg2
-pyjwt
-python-dotenv
-werkzeug
