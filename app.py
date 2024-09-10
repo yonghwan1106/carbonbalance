@@ -7,8 +7,6 @@ from pages import home, basic_info, carbon_calculator, carbon_map, visualization
 from utils.db_manager import init_db
 from pages import marketplace
     
-    # 데이터베이스 초기화
-    init_db()
     
 # 프로젝트 루트 디렉토리를 sys.path에 추가
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -16,6 +14,9 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 def main():
     st.set_page_config(page_title="Carbon Footprint Korea", page_icon="🍃", layout="wide")
+
+        # 데이터베이스 초기화
+    init_db()
     
     menu = ["Home", "Basic Info", "My Carbon Footprint", "Carbon Map", "Data Visualization", 
             "Carbon Credits", "Marketplace", "Profile", "Community", "Challenges", 
