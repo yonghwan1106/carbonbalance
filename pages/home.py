@@ -8,13 +8,15 @@ import json
 from utils.data_processor import get_latest_national_data
 from utils.ai_helper import get_daily_eco_tip
 
-def get_naver_news(query, client_id, client_secret):
+def get_naver_news(query):
+    client_id = "SszOvSXjnNOyqfiX_DVz"  # 여기에 직접 Client ID를 넣었습니다
+    client_secret = "eJlQoCzJkX"  # 여기에 직접 Client Secret을 넣었습니다
     encText = urllib.parse.quote(query)
     url = f"https://openapi.naver.com/v1/search/news.json?query={encText}&display=3&start=1&sort=date"
 
     request = urllib.request.Request(url)
-    request.add_header("SszOvSXjnNOyqfiX_DVz", client_id)
-    request.add_header("eJlQoCzJkX", client_secret)
+    request.add_header("X-Naver-Client-Id", client_id)
+    request.add_header("X-Naver-Client-Secret", client_secret)
     
     try:
         response = urllib.request.urlopen(request)
@@ -66,9 +68,7 @@ def show():
     # 최신 뉴스 또는 업데이트
     st.header("📰 최신 탄소 중립 소식")
     try:
-        client_id = st.secrets["NAVER_CLIENT_ID"]
-        client_secret = st.secrets["NAVER_CLIENT_SECRET"]
-        news_data = get_naver_news("탄소 중립", client_id, client_secret)
+        news_data = get_naver_news("탄소 중립")
         
         for item in news_data['items']:
             st.subheader(item['title'])
