@@ -71,17 +71,24 @@ transaction_type = st.selectbox("거래 유형 선택", ["buy", "sell"])
 
 # max_value를 조건부로 설정
 if transaction_type == "sell":
-    max_value = min(int(user_credits), 1000)  # user_credits와 1000 중 작은 값
+    if user_credits > 0:
+        max_value = min(int(user_credits), 1000)
+        amount = st.number_input("거래할 크레딧 양", min_value=1, max_value=max_value, value=1)
+    else:
+        st.warning("판매할 크레딧이 없습니다.")
+        amount = 0
 else:
     max_value = 1000
-
-amount = st.number_input("거래할 크레딧 양", min_value=1, max_value=max_value, value=1)
+    amount = st.number_input("거래할 크레딧 양", min_value=1, max_value=max_value, value=1)
 
 if st.button("거래 실행"):
-    if execute_transaction(user_id, transaction_type, amount):
-        # 거래 후 업데이트된 크레딧 현황
-        user_credits = get_user_credits(user_id)
-        st.write(f"현재 보유 크레딧: {user_credits} 크레딧")
+    if amount > 0:
+        if execute_transaction(user_id, transaction_type, amount):
+            # 거래 후 업데이트된 크레딧 현황
+            user_credits = get_user_credits(user_id)
+            st.write(f"현재 보유 크레딧: {user_credits} 크레딧")
+    else:
+        st.error("거래할 크레딧 양을 입력해주세요.")
 
 # 거래 내역 확인
 st.subheader("거래 내역")
