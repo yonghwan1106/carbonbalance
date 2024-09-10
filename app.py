@@ -1,21 +1,21 @@
 import streamlit as st
 import sys
 import os
-from pages import visualization, carbon_calculator, policy_suggestions, eco_game, carbon_map, basic_info
+import streamlit as st
+from pages import home, basic_info, carbon_calculator, carbon_map, visualization, carbon_credit, marketplace, profile, community, challenges, education_hub, policy_suggestions, eco_game
 
 # 프로젝트 루트 디렉토리를 sys.path에 추가
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-st.set_page_config(page_title="탄소중립 경기도!", page_icon="🌱", layout="wide")
-
 def main():
-    st.title("🌱 탄소 중립 경기도!")
+    st.set_page_config(page_title="Carbon Footprint Korea", page_icon="🍃", layout="wide")
     
-    menu = ["Home", "Basic Info", "Visualization", "Carbon Map", "Carbon Calculator", "Policy Suggestions", "Eco Game"]
-    choice = st.sidebar.selectbox("Menu", menu)
+    menu = ["Home", "Basic Info", "My Carbon Footprint", "Carbon Map", "Data Visualization", 
+            "Carbon Credits", "Marketplace", "Profile", "Community", "Challenges", 
+            "Education Hub", "Policy Suggestions", "Eco Game"]
     
     if choice == "Home":
-        st.write("이 앱은 경기도에서 당신의 탄소 배출을 관리하고 이해하도록 돕는 사이트입니다.")
+        st.write("이 앱은 당신의 탄소 배출을 관리하고 이해하도록 돕는 사이트입니다.")
     elif choice == "Basic Info":
         basic_info.show_basic_info()
     elif choice == "Visualization":
