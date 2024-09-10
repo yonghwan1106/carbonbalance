@@ -1,7 +1,7 @@
 import pandas as pd
 import random
 
-def load_gyeonggi_data():
+def get_latest_national_data():
     """
     경기도 탄소 배출 데이터를 로드합니다.
     실제 구현에서는 이 부분에 실제 데이터 파일을 로드하는 코드가 들어갑니다.
