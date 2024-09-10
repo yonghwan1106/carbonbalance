@@ -33,7 +33,14 @@ def show():
         st.write("여러분의 노력을 크레딧으로 보상받고 거래해보세요.")
         if st.button("마켓플레이스"):
             st.switch_page("pages/marketplace.py")
-      
+
+    
+    # 최신 국가 데이터
+    st.header("🇰🇷 대한민국 최신 탄소 배출 현황")
+    national_data = get_latest_national_data()
+    st.metric(label="총 탄소 배출량", value=f"{national_data['total_emissions']:,} 톤 CO2e",
+              delta=f"{national_data['emissions_change']}% 전년 대비")
+    
     # 일일 에코 팁
     st.header("🌱 오늘의 에코 팁")
     daily_tip = get_daily_eco_tip()
@@ -55,11 +62,6 @@ def show():
     if st.button("도전 과제 참여하기"):
         st.switch_page("pages/challenges.py")
 
-    # 최신 국가 데이터
-    st.header("🇰🇷 대한민국 최신 탄소 배출 현황")
-    national_data = get_latest_national_data()
-    st.metric(label="총 탄소 배출량", value=f"{national_data['total_emissions']:,} 톤 CO2e",
-              delta=f"{national_data['emissions_change']}% 전년 대비")
     
 if __name__ == "__main__":
     show()
