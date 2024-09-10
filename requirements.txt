@@ -6,8 +6,8 @@ geopandas
 pyproj
 shapely
 fiona
-sqlalchemy==1.4.39
-psycopg2-binary==2.9.3
-pyjwt==2.4.0
-python-dotenv==0.20.0
-werkzeug==2.0.3
+sqlalchemy
+psycopg2
+pyjwt
+python-dotenv
+werkzeug
