@@ -174,22 +174,22 @@ def show():
     df = load_data()
 
     # 데이터 개요
-    st.subheader("📊 데이터 개요")
-    st.write(df.describe())
+     # st.subheader("📊 데이터 개요")
+     # st.write(df.describe())
 
     # 데이터 타입 및 결측값 확인
-    st.subheader("ℹ️ 데이터 정보")
-    buffer = io.StringIO()
-    df.info(buf=buffer)
-    s = buffer.getvalue()
-    st.text(s)
+     # st.subheader("ℹ️ 데이터 정보")
+     # buffer = io.StringIO()
+     # df.info(buf=buffer)
+     # s = buffer.getvalue()
+     # st.text(s)
     
-    st.subheader("🔍 결측값 확인")
-    st.write(df.isnull().sum())
+     # st.subheader("🔍 결측값 확인")
+     # st.write(df.isnull().sum())
 
     # 상위 5개 행 표시
-    st.subheader("👀 데이터 미리보기")
-    st.write(df.head())
+     # st.subheader("👀 데이터 미리보기")
+     # st.write(df.head())
 
     # 지자체 선택 옵션
     selected_municipalities = st.multiselect(
