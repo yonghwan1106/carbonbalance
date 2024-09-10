@@ -98,7 +98,17 @@ class CreditManager:
         if owner:
             return [t for t in self.transactions if t.get("owner") == owner or t.get("from_owner") == owner or t.get("to_owner") == owner]
         return self.transactions
-
+        
+    @staticmethod
+    def expire_credits():
+        session = get_db_session()
+        now = datetime.utcnow()
+        expired_credits = session.query(Credit).filter(Credit.expiration_date <= now, Credit.is_active == True).all()
+        for credit in expired_credits:
+            credit.is_active = False
+        session.commit()
+        session.close()
+        
 # 사용 예시
 if __name__ == "__main__":
     manager = CreditManager()
