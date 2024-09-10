@@ -14,7 +14,9 @@ def main():
     menu = ["Home", "Basic Info", "My Carbon Footprint", "Carbon Map", "Data Visualization", 
             "Carbon Credits", "Marketplace", "Profile", "Community", "Challenges", 
             "Education Hub", "Policy Suggestions", "Eco Game"]
-    
+
+    choice = st.sidebar.selectbox("Menu", menu)
+
     if choice == "Home":
         home.show()
     elif choice == "Basic Info":
