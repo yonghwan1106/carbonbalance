@@ -12,7 +12,7 @@ def get_naver_news(query):
     client_id = "SszOvSXjnNOyqfiX_DVz"  # 여기에 직접 Client ID를 넣었습니다
     client_secret = "eJlQoCzJkX"  # 여기에 직접 Client Secret을 넣었습니다
     encText = urllib.parse.quote(query)
-    url = f"https://openapi.naver.com/v1/search/news.json?query={encText}&display=3&start=1&sort=date"
+    url = f"https://openapi.naver.com/v1/search/news.json?query={encText}&display=5&start=1&sort=date"
 
     request = urllib.request.Request(url)
     request.add_header("X-Naver-Client-Id", client_id)
@@ -59,12 +59,7 @@ def show():
         st.write("여러분의 노력을 크레딧으로 보상받고 거래해보세요.")
         if st.button("마켓플레이스"):
             st.switch_page("pages/marketplace.py")
-      
-    # 일일 에코 팁
-    st.header("🌱 오늘의 에코 팁")
-    daily_tip = get_daily_eco_tip()
-    st.info(daily_tip)
-     
+
     # 최신 뉴스 또는 업데이트
     st.header("📰 최신 탄소 중립 소식")
     try:
@@ -86,6 +81,12 @@ def show():
         for item in news_items:
             st.write(f"• {item}")
 
+          
+    # 일일 에코 팁
+    st.header("🌱 오늘의 에코 팁")
+    daily_tip = get_daily_eco_tip()
+    st.info(daily_tip)
+     
     # 사용자 참여 유도
     st.header("함께 만들어가는 녹색 미래")
     st.write("여러분의 작은 실천이 큰 변화를 만듭니다. 지금 시작해보세요!")
