@@ -18,7 +18,7 @@ def get_naver_news(query):
     client_id = "SszOvSXjnNOyqfiX_DVz"
     client_secret = "eJlQoCzJkX"
     encText = urllib.parse.quote(query)
-    url = f"https://openapi.naver.com/v1/search/news.json?query={encText}&display=3&start=1&sort=date"
+    url = f"https://openapi.naver.com/v1/search/news.json?query={encText}&display=5&start=1&sort=date"
 
     request = urllib.request.Request(url)
     request.add_header("X-Naver-Client-Id", client_id)
