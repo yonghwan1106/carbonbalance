@@ -6,6 +6,8 @@ from pages import home, basic_info, carbon_calculator, carbon_map, visualization
 import importlib
 import uuid
 from datetime import datetime, timedelta
+from streamlit_cookies_manager import CookieManager
+
 
 # 페이지 모듈 동적 임포트 함수
 def import_page(page_name):
