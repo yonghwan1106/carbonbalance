@@ -28,17 +28,20 @@ def import_page(page_name):
 
 # 세션 상태 초기화 함수
 def init_session_state():
-    if 'cookie_manager' not in st.session_state:
-        st.session_state.cookie_manager = CookieManager()
-    
-    if not st.session_state.cookie_manager.ready():
-        st.stop()
+    try:
+        if 'cookie_manager' not in st.session_state:
+            st.session_state.cookie_manager = CookieManager()
+        
+        if not st.session_state.cookie_manager.ready():
+            st.stop()
+    except Exception as e:
+        st.error(f"쿠키 관리자 초기화 중 오류 발생: {str(e)}")
+        st.session_state.cookie_manager = None
 
     if 'session_id' not in st.session_state:
-        session_id = st.session_state.cookie_manager.get('session_id')
-        if not session_id:
-            query_params = st.experimental_get_query_params()
-            session_id = query_params.get('session_id', [None])[0]
+        # URL 쿼리 파라미터에서 세션 ID 확인
+        query_params = st.experimental_get_query_params()
+        session_id = query_params.get('session_id', [None])[0]
         st.session_state.session_id = session_id
 
 # 데이터베이스 초기화
@@ -91,7 +94,11 @@ def create_session(user_id, username):
     conn.commit()
     conn.close()
     
-    st.session_state.cookie_manager.set('session_id', session_id)
+    # 쿠키에 세션 ID 저장
+    if st.session_state.cookie_manager:
+        st.session_state.cookie_manager.set('session_id', session_id)
+    
+    # URL에 세션 ID 추가
     st.experimental_set_query_params(session_id=session_id)
     
     return session_id
@@ -138,11 +145,17 @@ def main():
         if session:
             st.session_state.logged_in = True
             st.session_state.user_data = {'user_id': session[1], 'username': session[2]}
+            # 세션이 유효한 경우 쿠키 갱신
+            if st.session_state.cookie_manager:
+                st.session_state.cookie_manager.set('session_id', st.session_state.session_id)
             show_main_app()
         else:
+            # 세션이 유효하지 않은 경우 초기화
             st.session_state.session_id = None
             st.session_state.logged_in = False
             st.session_state.user_data = {}
+            if st.session_state.cookie_manager:
+                st.session_state.cookie_manager.delete('session_id')
             show_login_page()
     else:
         show_login_page()
@@ -165,6 +178,9 @@ def show_login_page():
                     'user_id': user_id,
                     'username': username
                 }
+                # 쿠키에 세션 ID 저장
+                if st.session_state.cookie_manager:
+                    st.session_state.cookie_manager.set('session_id', session_id)
                 st.success("로그인 성공!")
                 st.rerun()
             else:
