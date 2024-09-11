@@ -192,9 +192,9 @@ def show_main_app():
     )
     
     # 메뉴에 따른 페이지 표시 
-    page_func = import_page(menu)
-    if page_func:
-        page_func()
+    #page_func = import_page(menu)
+    #if page_func:
+    #    page_func()
 
     # 세션 상태를 통한 데이터 공유 예시
     st.sidebar.write(f"현재 로그인: {st.session_state.user_data.get('username', '알 수 없음')}")
