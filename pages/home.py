@@ -79,7 +79,8 @@ def show():
         for item in news_data['items']:
             clean_title = remove_html_tags(item['title'])  # HTML 태그 제거
             clean_description = remove_html_tags(item['description'])  # HTML 태그 제거
-            st.subheader(clean_title)
+            # 원래 큰 글씨로 출력되는 부분 st.subheader(clean_title)
+            st.markdown(f"<h4 style='font-size: 16px;'>{clean_title}</h4>", unsafe_allow_html=True)
             st.write(clean_description)
             st.write(f"[기사 보기]({item['link']})")
             st.write("---")
