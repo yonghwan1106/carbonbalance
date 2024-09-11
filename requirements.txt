@@ -13,3 +13,5 @@ jwt
 werkzeug
 python-dotenv
 streamlit-cookies-manager
+import sqlite3
+
