@@ -65,12 +65,7 @@ def show():
         st.write("여러분의 노력을 크레딧으로 보상받고 거래해보세요.")
         if st.button("마켓플레이스"):
             st.switch_page("pages/marketplace.py")
-      
-    # 일일 에코 팁
-    st.header("🌱 오늘의 에코 팁")
-    daily_tip = get_daily_eco_tip()
-    st.info(daily_tip)
-     
+
     # 최신 뉴스 또는 업데이트
     st.header("📰 최신 탄소 중립 소식")
     try:
@@ -80,7 +75,7 @@ def show():
             clean_title = remove_html_tags(item['title'])  # HTML 태그 제거
             clean_description = remove_html_tags(item['description'])  # HTML 태그 제거
             # 원래 큰 글씨로 출력되는 부분 st.subheader(clean_title)
-            st.markdown(f"<h4 style='font-size: 16px;'>{clean_title}</h4>", unsafe_allow_html=True)
+            st.markdown(f"<h3 style='font-size: 13px;'>{clean_title}</h3>", unsafe_allow_html=True)
             st.write(clean_description)
             st.write(f"[기사 보기]({item['link']})")
             st.write("---")
@@ -95,6 +90,12 @@ def show():
         for item in news_items:
             st.write(f"• {item}")
 
+          
+    # 일일 에코 팁
+    st.header("🌱 오늘의 에코 팁")
+    daily_tip = get_daily_eco_tip()
+    st.info(daily_tip)
+     
     # 사용자 참여 유도
     st.header("함께 만들어가는 녹색 미래")
     st.write("여러분의 작은 실천이 큰 변화를 만듭니다. 지금 시작해보세요!")
