@@ -100,7 +100,7 @@ def show():
         for item in news_data['items']:
             clean_title = remove_html_tags(item['title'])
             clean_description = remove_html_tags(item['description'])
-            st.markdown(f"<h5 style='font-size: 13px;'>{clean_title}</h5>", unsafe_allow_html=True)
+            st.markdown(f"<h4 style='font-size: 13px;'>{clean_title}</h4>", unsafe_allow_html=True)
             st.write(clean_description)
             st.write(f"[기사 보기]({item['link']})")
             st.write("---")
