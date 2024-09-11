@@ -29,10 +29,21 @@ def import_page(page_name):
 
 # 세션 상태 초기화 함수
 def init_session_state():
-    if 'logged_in' not in st.session_state:
-        st.session_state.logged_in = False
-    if 'user_data' not in st.session_state:
-        st.session_state.user_data = {}
+    if 'cookie_manager' not in st.session_state:
+        st.session_state.cookie_manager = CookieManager()
+    
+    if not st.session_state.cookie_manager.ready():
+        st.stop()
+
+    if 'session_id' not in st.session_state:
+        # 쿠키에서 세션 ID 확인
+        session_id = st.session_state.cookie_manager.get('session_id')
+        if not session_id:
+            # URL 쿼리 파라미터에서 세션 ID 확인
+            query_params = st.experimental_get_query_params()
+            session_id = query_params.get('session_id', [None])[0]
+        
+        st.session_state.session_id = session_id
 
 # 데이터베이스 초기화
 def init_db():
@@ -83,6 +94,13 @@ def create_session(user_id, username):
               (session_id, user_id, username, expires_at))
     conn.commit()
     conn.close()
+    
+    # 세션 ID를 쿠키에 저장
+    st.session_state.cookie_manager.set('session_id', session_id)
+    
+    # URL에 세션 ID 추가
+    st.experimental_set_query_params(session_id=session_id)
+    
     return session_id
 
 # 세션 확인
@@ -121,16 +139,6 @@ def main():
     
     init_db()
     init_session_state()
-    
-    # 쿼리 파라미터 처리 수정
-    query_params = st.experimental_get_query_params()
-    session_id = query_params.get('session_id', [None])[0]
-    
-    if 'session_id' not in st.session_state:
-        st.session_state.session_id = session_id
-
-    if st.sidebar.button("데이터베이스 상태 확인"):
-        check_database()
 
     if st.session_state.session_id:
         session = get_session(st.session_state.session_id)
@@ -155,7 +163,6 @@ def show_login_page():
         username = st.text_input("사용자명")
         password = st.text_input("비밀번호", type="password")
         if st.button("로그인"):
-            st.write("로그인 시도 중...")  # 디버그 정보
             user_id = authenticate_user(username, password)
             if user_id:
                 session_id = create_session(user_id, username)
@@ -166,7 +173,6 @@ def show_login_page():
                     'username': username
                 }
                 st.success("로그인 성공!")
-                st.write("로그인 후 세션 상태:", st.session_state)  # 디버그 정보
                 st.rerun()
             else:
                 st.error("잘못된 사용자명 또는 비밀번호입니다.")
@@ -201,9 +207,11 @@ def show_main_app():
 
     if st.sidebar.button("로그아웃"):
         delete_session(st.session_state.session_id)
+        st.session_state.cookie_manager.delete('session_id')
         st.session_state.session_id = None
         st.session_state.logged_in = False
         st.session_state.user_data = {}
+        st.experimental_set_query_params()  # URL에서 세션 ID 제거
         st.rerun()
 
 if __name__ == "__main__":
