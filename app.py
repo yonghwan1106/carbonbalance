@@ -8,24 +8,24 @@ import uuid
 from datetime import datetime, timedelta
 
 # 페이지 모듈 동적 임포트 함수
-#def import_page(page_name):
-#    try:
-#        # 디버그 정보 출력
-#        # st.write(f"Trying to import: pages.{page_name}")
+def import_page(page_name):
+    try:
+        # 디버그 정보 출력
+        st.write(f"Trying to import: pages.{page_name}")
         
-#        #module = importlib.import_module(f"pages.{page_name}")
-#        
-#        # 성공적으로 임포트된 경우
-#        #st.write(f"Successfully imported: pages.{page_name}")
-#        
-#        if hasattr(module, 'show'):
-#            return module.show
-#        else:
-#            st.error(f"'{page_name}' 페이지에 'show' 함수가 정의되어 있지 않습니다.")
-#            return None
-#    except ImportError as e:
-#        st.error(f"'{page_name}' 페이지 모듈을 찾을 수 없습니다. 오류: {str(e)}")
-#        return None
+        module = importlib.import_module(f"pages.{page_name}")
+        
+        # 성공적으로 임포트된 경우
+        st.write(f"Successfully imported: pages.{page_name}")
+        
+        if hasattr(module, 'show'):
+            return module.show
+        else:
+            st.error(f"'{page_name}' 페이지에 'show' 함수가 정의되어 있지 않습니다.")
+            return None
+    except ImportError as e:
+        st.error(f"'{page_name}' 페이지 모듈을 찾을 수 없습니다. 오류: {str(e)}")
+        return None
 
 # 세션 상태 초기화 함수
 def init_session_state():
