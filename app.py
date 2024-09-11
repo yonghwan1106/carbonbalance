@@ -90,9 +90,13 @@ def show_login_page():
         username = st.text_input("사용자명")
         password = st.text_input("비밀번호", type="password")
         if st.button("로그인"):
-            if authenticate_user(username, password):
+            user = authenticate_user(username, password)
+            if user:
                 st.session_state.logged_in = True
-                st.session_state.user_data['username'] = username  # 사용자 데이터 저장
+                st.session_state.user_data = {
+                    'user_id': user.id,  # user.id가 실제 사용자 ID를 반환하는지 확인
+                    'username': username
+                }
                 st.success("로그인 성공!")
                 st.rerun()
             else:
