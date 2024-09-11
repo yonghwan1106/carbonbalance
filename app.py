@@ -121,27 +121,7 @@ def show_main_app():
          "탄소 크레딧", "마켓플레이스", "프로필", "에코 게임"]
     )
     
-    # 선택된 메뉴에 따라 해당 페이지 표시
-    if menu == "홈":
-        home.show()
-    elif menu == "기본 정보":
-        basic_info.show()
-    elif menu == "탄소 계산기":
-        carbon_calculator.show()
-    elif menu == "탄소 지도":
-        carbon_map.show()
-    elif menu == "데이터 시각화":
-        visualization.show()
-    elif menu == "탄소 크레딧":
-        credit_manager.show()
-    elif menu == "마켓플레이스":
-        marketplace.show()
-    elif menu == "프로필":
-        profile.show()
-    elif menu == "에코 게임":
-        eco_game.show()
-
-    # 메뉴에 따른 페이지 표시
+    # 메뉴에 따른 페이지 표시 
     page_func = import_page(menu.lower().replace(" ", "_"))
     if page_func:
         page_func()
