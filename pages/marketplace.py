@@ -1,33 +1,21 @@
 import streamlit as st
 import pandas as pd
 from utils.credit_manager import CreditManager
-from utils.auth_manager import authenticate_user, create_token, verify_token
-from utils.db_manager import get_db_session
-from models.user import User
 
 def show():
     st.title("💰 탄소 크레딧 거래")
 
     # 로그인 상태 확인
-    if 'user_id' not in st.session_state:
-        show_login()
-    else:
-        show_marketplace(st.session_state.user_id)
+    if 'user_data' not in st.session_state or not st.session_state.user_data:
+        st.warning("이 페이지를 이용하려면 로그인이 필요합니다.")
+        return
 
-def show_login():
-    st.subheader("로그인")
-    username = st.text_input("사용자명")
-    password = st.text_input("비밀번호", type="password")
-    if st.button("로그인"):
-        user = authenticate_user(username, password)
-        if user:
-            token = create_token(user.id)
-            st.session_state.user_id = user.id
-            st.session_state.token = token
-            st.success("로그인 성공!")
-            st.experimental_rerun()
-        else:
-            st.error("잘못된 사용자명 또는 비밀번호입니다.")
+    user_id = st.session_state.user_data.get('user_id')
+    if not user_id:
+        st.error("사용자 정보를 찾을 수 없습니다. 다시 로그인해주세요.")
+        return
+
+    show_marketplace(user_id)
 
 def show_marketplace(user_id):
     # 탄소 크레딧 설명 추가
@@ -58,9 +46,9 @@ def show_marketplace(user_id):
 
     # 거래 섹션
     st.subheader("크레딧 거래")
-    transaction_type = st.selectbox("거래 유형 선택", ["buy", "sell"])
+    transaction_type = st.selectbox("거래 유형 선택", ["구매", "판매"])
 
-    if transaction_type == "sell":
+    if transaction_type == "판매":
         if user_credits > 0:
             max_value = min(int(user_credits), 1000)
             amount = st.number_input("거래할 크레딧 양", min_value=1, max_value=max_value, value=1)
@@ -74,10 +62,10 @@ def show_marketplace(user_id):
     if st.button("거래 실행"):
         if amount > 0:
             try:
-                if transaction_type == "buy":
+                if transaction_type == "구매":
                     credit_id = CreditManager.issue_credit(amount, user_id)
                     st.success(f"{amount} 크레딧이 성공적으로 구매되었습니다. 크레딧 ID: {credit_id}")
-                else:  # sell
+                else:  # 판매
                     CreditManager.retire_credit(user_id, amount)
                     st.success(f"{amount} 크레딧이 성공적으로 판매되었습니다.")
                 
@@ -97,12 +85,6 @@ def show_marketplace(user_id):
         st.write(df)
     else:
         st.write("거래 내역이 없습니다.")
-
-    # 로그아웃 버튼
-    if st.button("로그아웃"):
-        del st.session_state.user_id
-        del st.session_state.token
-        st.experimental_rerun()
 
     # 만료된 크레딧 처리
     CreditManager.expire_credits()
