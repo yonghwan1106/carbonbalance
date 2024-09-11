@@ -8,18 +8,10 @@ import uuid
 from datetime import datetime, timedelta
 from streamlit_cookies_manager import CookieManager
 
-
 # 페이지 모듈 동적 임포트 함수
 def import_page(page_name):
     try:
-        # 디버그 정보 출력
-        st.write(f"Trying to import: pages.{page_name}")
-        
         module = importlib.import_module(f"pages.{page_name}")
-        
-        # 성공적으로 임포트된 경우
-        st.write(f"Successfully imported: pages.{page_name}")
-        
         if hasattr(module, 'show'):
             return module.show
         else:
@@ -38,13 +30,10 @@ def init_session_state():
         st.stop()
 
     if 'session_id' not in st.session_state:
-        # 쿠키에서 세션 ID 확인
         session_id = st.session_state.cookie_manager.get('session_id')
         if not session_id:
-            # URL 쿼리 파라미터에서 세션 ID 확인
             query_params = st.experimental_get_query_params()
             session_id = query_params.get('session_id', [None])[0]
-        
         st.session_state.session_id = session_id
 
 # 데이터베이스 초기화
@@ -97,10 +86,7 @@ def create_session(user_id, username):
     conn.commit()
     conn.close()
     
-    # 세션 ID를 쿠키에 저장
     st.session_state.cookie_manager.set('session_id', session_id)
-    
-    # URL에 세션 ID 추가
     st.experimental_set_query_params(session_id=session_id)
     
     return session_id
@@ -178,7 +164,6 @@ def show_login_page():
                 st.rerun()
             else:
                 st.error("잘못된 사용자명 또는 비밀번호입니다.")
-                st.write("로그인 실패 후 세션 상태:", st.session_state)  # 디버그 정보
     
     with tab2:
         new_username = st.text_input("새 사용자명")
@@ -190,8 +175,6 @@ def show_login_page():
                 st.error("이미 존재하는 사용자명입니다.")
 
 def show_main_app():
-#    st.title("🌿 Carbon neutrality Korea")
-    
     # 사이드바에 메뉴 추가
     menu = st.sidebar.selectbox(
         "메뉴를 선택하세요",
