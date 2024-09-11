@@ -66,6 +66,7 @@ def show():
         if st.button("마켓플레이스"):
             st.switch_page("pages/marketplace.py")
 
+    
     # 최신 뉴스 또는 업데이트
     st.header("📰 최신 탄소 중립 소식")
     try:
@@ -75,7 +76,7 @@ def show():
             clean_title = remove_html_tags(item['title'])  # HTML 태그 제거
             clean_description = remove_html_tags(item['description'])  # HTML 태그 제거
             # 원래 큰 글씨로 출력되는 부분 st.subheader(clean_title)
-            st.markdown(f"<h3 style='font-size: 13px;'>{clean_title}</h3>", unsafe_allow_html=True)
+            st.markdown(f"<h5 style='font-size: 13px;'>{clean_title}</h5>", unsafe_allow_html=True)
             st.write(clean_description)
             st.write(f"[기사 보기]({item['link']})")
             st.write("---")
