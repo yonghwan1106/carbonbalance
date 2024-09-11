@@ -48,17 +48,23 @@ def main():
     # 세션 상태 초기화
     if 'logged_in' not in st.session_state:
         st.session_state.logged_in = False
+    if 'show_success' not in st.session_state:
+        st.session_state.show_success = False
 
     # 사이드바에 로그인/로그아웃 버튼
     if st.session_state.logged_in:
         if st.sidebar.button("로그아웃"):
             st.session_state.logged_in = False
-            st.experimental_rerun()
+            st.session_state.show_success = False
+            st.rerun()
     
     # 로그인 상태에 따른 화면 표시
     if not st.session_state.logged_in:
         show_login_page()
     else:
+        if st.session_state.show_success:
+            st.success("로그인 성공!")
+            st.session_state.show_success = False
         show_main_app()
 
 def show_login_page():
@@ -67,19 +73,19 @@ def show_login_page():
     tab1, tab2 = st.tabs(["로그인", "회원가입"])
     
     with tab1:
-        username = st.text_input("사용자명")
-        password = st.text_input("비밀번호", type="password")
+        username = st.text_input("사용자명", key="login_username")
+        password = st.text_input("비밀번호", type="password", key="login_password")
         if st.button("로그인"):
             if authenticate_user(username, password):
                 st.session_state.logged_in = True
-                st.success("로그인 성공!")
-                st.experimental_rerun()
+                st.session_state.show_success = True
+                st.rerun()
             else:
                 st.error("잘못된 사용자명 또는 비밀번호입니다.")
     
     with tab2:
-        new_username = st.text_input("새 사용자명")
-        new_password = st.text_input("새 비밀번호", type="password")
+        new_username = st.text_input("새 사용자명", key="register_username")
+        new_password = st.text_input("새 비밀번호", type="password", key="register_password")
         if st.button("회원가입"):
             if register_user(new_username, new_password):
                 st.success("회원가입 성공! 이제 로그인할 수 있습니다.")
