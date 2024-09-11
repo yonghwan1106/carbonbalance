@@ -4,19 +4,14 @@ import hashlib
 from pathlib import Path
 from pages import home, basic_info, carbon_calculator, carbon_map, visualization, credit_manager, marketplace, profile, eco_game
 import importlib
-from streamlit_cookies_manager import CookieManager
+import uuid
+from datetime import datetime, timedelta
+
 
 # 페이지 모듈 동적 임포트 함수
 def import_page(page_name):
     try:
-        # 디버그 정보 출력
-        st.write(f"Trying to import: pages.{page_name}")
-        
         module = importlib.import_module(f"pages.{page_name}")
-        
-        # 성공적으로 임포트된 경우
-        st.write(f"Successfully imported: pages.{page_name}")
-        
         if hasattr(module, 'show'):
             return module.show
         else:
@@ -35,37 +30,39 @@ def init_session_state():
 
 # 데이터베이스 연결 및 세션 테이블 생성
 def init_db():
-    conn = sqlite3.connect('sessions.db')
+    conn = sqlite3.connect('carbon_neutral.db')
     c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS users
+                 (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
     c.execute('''CREATE TABLE IF NOT EXISTS sessions
                  (session_id TEXT PRIMARY KEY, user_id INTEGER, username TEXT, expires_at DATETIME)''')
     conn.commit()
     conn.close()
 
+# 세션 생성
 def create_session(user_id, username):
     session_id = str(uuid.uuid4())
-    expires_at = datetime.now() + timedelta(days=1)  # 세션 유효 기간 설정 (예: 1일)
-    
-    conn = sqlite3.connect('sessions.db')
+    expires_at = datetime.now() + timedelta(days=1)
+    conn = sqlite3.connect('carbon_neutral.db')
     c = conn.cursor()
     c.execute("INSERT INTO sessions (session_id, user_id, username, expires_at) VALUES (?, ?, ?, ?)",
               (session_id, user_id, username, expires_at))
     conn.commit()
     conn.close()
-    
     return session_id
 
+# 세션 확인
 def get_session(session_id):
-    conn = sqlite3.connect('sessions.db')
+    conn = sqlite3.connect('carbon_neutral.db')
     c = conn.cursor()
     c.execute("SELECT * FROM sessions WHERE session_id = ? AND expires_at > ?", (session_id, datetime.now()))
     session = c.fetchone()
     conn.close()
-    
     return session
 
+# 세션 삭제
 def delete_session(session_id):
-    conn = sqlite3.connect('sessions.db')
+    conn = sqlite3.connect('carbon_neutral.db')
     c = conn.cursor()
     c.execute("DELETE FROM sessions WHERE session_id = ?", (session_id,))
     conn.commit()
@@ -126,26 +123,17 @@ def main():
     if st.session_state.session_id:
         session = get_session(st.session_state.session_id)
         if session:
-            st.write(f"로그인 상태: {session[2]}")  # username
-            if st.button("로그아웃"):
+            st.sidebar.write(f"로그인 상태: {session[2]}")  # username
+            if st.sidebar.button("로그아웃"):
                 delete_session(st.session_state.session_id)
                 st.session_state.session_id = None
                 st.rerun()
+            show_main_app()
         else:
             st.session_state.session_id = None
-    
-    if not st.session_state.session_id:
-        username = st.text_input("사용자명")
-        password = st.text_input("비밀번호", type="password")
-        if st.button("로그인"):
-            # 여기서 실제 인증 로직을 구현해야 합니다
-            user_id = authenticate_user(username, password)  # 이 함수는 별도로 구현해야 합니다
-            if user_id:
-                session_id = create_session(user_id, username)
-                st.session_state.session_id = session_id
-                st.rerun()
-            else:
-                st.error("로그인 실패")
+            show_login_page()
+    else:
+        show_login_page()
 
 def show_login_page():
     st.title("🌿 탄소중립 코리아에 오신 것을 환영합니다")
@@ -156,21 +144,14 @@ def show_login_page():
         username = st.text_input("사용자명")
         password = st.text_input("비밀번호", type="password")
         if st.button("로그인"):
-            st.write("로그인 시도 중...")  # 디버그 정보
             user_id = authenticate_user(username, password)
             if user_id:
-                st.session_state.logged_in = True
-                st.session_state.user_data = {
-                    'user_id': user_id,
-                    'username': username
-                }
+                session_id = create_session(user_id, username)
+                st.session_state.session_id = session_id
                 st.success("로그인 성공!")
-                st.write("로그인 후 세션 상태:", st.session_state)  # 디버그 정보
-                time.sleep(2)  # 사용자가 메시지를 볼 수 있도록 잠시 대기
                 st.rerun()
             else:
                 st.error("잘못된 사용자명 또는 비밀번호입니다.")
-                st.write("로그인 실패 후 세션 상태:", st.session_state)  # 디버그 정보
     
     with tab2:
         new_username = st.text_input("새 사용자명")
@@ -184,21 +165,15 @@ def show_login_page():
 def show_main_app():
     st.title("🌿 탄소중립 코리아")
     
-    # 사이드바에 메뉴 추가
     menu = st.sidebar.selectbox(
         "메뉴를 선택하세요",
         ["home", "basic_info", "carbon_calculator", "carbon_map", "visualization", 
          "credit_manager", "marketplace", "profile", "eco_game"]
     )
     
-    # 메뉴에 따른 페이지 표시 
     page_func = import_page(menu)
     if page_func:
         page_func()
 
-    # 세션 상태를 통한 데이터 공유 예시
-    st.sidebar.write(f"현재 로그인: {st.session_state.user_data.get('username', '알 수 없음')}")
-
 if __name__ == "__main__":
-    init_db()
     main()
