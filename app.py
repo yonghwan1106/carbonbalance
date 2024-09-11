@@ -182,7 +182,7 @@ def show_login_page():
                 st.error("이미 존재하는 사용자명입니다.")
 
 def show_main_app():
-    st.title("🌿 Carbon neutrality Korea")
+#    st.title("🌿 Carbon neutrality Korea")
     
     # 사이드바에 메뉴 추가
     menu = st.sidebar.selectbox(
