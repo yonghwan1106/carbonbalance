@@ -6,17 +6,26 @@ import urllib.request
 import urllib.parse
 import json
 import re
+from dotenv import load_dotenv
 from utils.data_processor import get_latest_national_data
 from utils.ai_helper import get_daily_eco_tip
+
+# 환경 변수 로드
+load_dotenv()
 
 def remove_html_tags(text):
     """HTML 태그를 제거하는 함수"""
     clean = re.compile('<.*?>')
     return re.sub(clean, '', text)
 
+@st.cache_data(ttl=3600)  # 1시간 동안 캐시
 def get_naver_news(query):
-    client_id = "SszOvSXjnNOyqfiX_DVz"
-    client_secret = "eJlQoCzJkX"
+    client_id = os.getenv("NAVER_CLIENT_ID")
+    client_secret = os.getenv("NAVER_CLIENT_SECRET")
+    
+    if not client_id or not client_secret:
+        raise ValueError("Naver API 키가 설정되지 않았습니다.")
+
     encText = urllib.parse.quote(query)
     url = f"https://openapi.naver.com/v1/search/news.json?query={encText}&display=5&start=1&sort=date"
 
@@ -34,6 +43,22 @@ def get_naver_news(query):
             raise Exception(f"Error Code: {rescode}")
     except Exception as e:
         raise Exception(f"API 호출 실패: {str(e)}")
+
+@st.cache_data(ttl=86400)  # 24시간 동안 캐시
+def get_cached_national_data():
+    try:
+        return get_latest_national_data()
+    except Exception as e:
+        st.error(f"국가 데이터를 가져오는 중 오류 발생: {str(e)}")
+        return None
+
+@st.cache_data(ttl=86400)  # 24시간 동안 캐시
+def get_cached_daily_tip():
+    try:
+        return get_daily_eco_tip()
+    except Exception as e:
+        st.error(f"일일 에코 팁을 가져오는 중 오류 발생: {str(e)}")
+        return "오늘의 에코 팁을 불러올 수 없습니다. 대신 작은 실천으로 시작해보세요: 사용하지 않는 전자기기의 플러그를 뽑아두세요."
 
 def show():
     st.title("🍃 Carbon Footprint Korea")
@@ -73,9 +98,8 @@ def show():
         news_data = get_naver_news("탄소 중립")
         
         for item in news_data['items']:
-            clean_title = remove_html_tags(item['title'])  # HTML 태그 제거
-            clean_description = remove_html_tags(item['description'])  # HTML 태그 제거
-            # 원래 큰 글씨로 출력되는 부분 st.subheader(clean_title)
+            clean_title = remove_html_tags(item['title'])
+            clean_description = remove_html_tags(item['description'])
             st.markdown(f"<h5 style='font-size: 13px;'>{clean_title}</h5>", unsafe_allow_html=True)
             st.write(clean_description)
             st.write(f"[기사 보기]({item['link']})")
@@ -94,7 +118,7 @@ def show():
           
     # 일일 에코 팁
     st.header("🌱 오늘의 에코 팁")
-    daily_tip = get_daily_eco_tip()
+    daily_tip = get_cached_daily_tip()
     st.info(daily_tip)
      
     # 사용자 참여 유도
@@ -105,9 +129,27 @@ def show():
 
     # 최신 국가 데이터
     st.header("🇰🇷 대한민국 최신 탄소 배출 현황")
-    national_data = get_latest_national_data()
-    st.metric(label="총 탄소 배출량", value=f"{national_data['total_emissions']:,} 톤 CO2e",
-              delta=f"{ROUND(national_data['emissions_change']),1}% 전년 대비")
-    
+    national_data = get_cached_national_data()
+    if national_data:
+        try:
+            total_emissions = national_data.get('total_emissions', 'N/A')
+            emissions_change = national_data.get('emissions_change', 'N/A')
+            
+            if isinstance(total_emissions, (int, float)):
+                total_emissions_str = f"{total_emissions:,} 톤 CO2e"
+            else:
+                total_emissions_str = "데이터 없음"
+            
+            if isinstance(emissions_change, (int, float)):
+                delta_str = f"{emissions_change:+.1f}% 전년 대비"
+            else:
+                delta_str = "변화율 데이터 없음"
+            
+            st.metric(label="총 탄소 배출량", value=total_emissions_str, delta=delta_str)
+        except Exception as e:
+            st.error(f"데이터 처리 중 오류 발생: {str(e)}")
+    else:
+        st.error("현재 국가 데이터를 표시할 수 없습니다.")
+        
 if __name__ == "__main__":
     show()
