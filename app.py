@@ -57,16 +57,33 @@ def authenticate_user(username, password):
     conn = sqlite3.connect('carbon_neutral.db')
     c = conn.cursor()
     hashed_password = hash_password(password)
-    c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, hashed_password))
+    c.execute("SELECT id FROM users WHERE username=? AND password=?", (username, hashed_password))
     result = c.fetchone()
     conn.close()
-    return result is not None
+    return result[0] if result else None
+
+def check_database():
+    conn = sqlite3.connect('carbon_neutral.db')
+    c = conn.cursor()
+    c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
+    if c.fetchone():
+        st.success("users 테이블이 존재합니다.")
+        c.execute("SELECT COUNT(*) FROM users")
+        count = c.fetchone()[0]
+        st.write(f"현재 users 테이블에 {count}개의 레코드가 있습니다.")
+    else:
+        st.error("users 테이블이 존재하지 않습니다.")
+    conn.close()
+
 
 # 메인 앱
 def main():
     st.set_page_config(page_title="탄소중립 코리아", page_icon="🌿", layout="wide")
     
     init_session_state()
+
+    if st.sidebar.button("데이터베이스 상태 확인"):
+        check_database()
 
     # 사이드바에 로그인/로그아웃 버튼
     if st.session_state.logged_in:
@@ -90,11 +107,11 @@ def show_login_page():
         username = st.text_input("사용자명")
         password = st.text_input("비밀번호", type="password")
         if st.button("로그인"):
-            user = authenticate_user(username, password)
-            if user:
+            user_id = authenticate_user(username, password)
+            if user_id:
                 st.session_state.logged_in = True
                 st.session_state.user_data = {
-                    'user_id': user.id,  # user.id가 실제 사용자 ID를 반환하는지 확인
+                    'user_id': user_id,
                     'username': username
                 }
                 st.success("로그인 성공!")
