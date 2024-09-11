@@ -4,6 +4,7 @@ import hashlib
 from pathlib import Path
 from pages import home, basic_info, carbon_calculator, carbon_map, visualization, credit_manager, marketplace, profile, eco_game
 import importlib
+from streamlit_cookies_manager import CookieManager
 
 # 페이지 모듈 동적 임포트 함수
 def import_page(page_name):
@@ -87,20 +88,30 @@ def check_database():
 def main():
     st.set_page_config(page_title="탄소중립 코리아", page_icon="🌿", layout="wide")
     
+    cookie_manager = CookieManager()
+    
+    if not cookie_manager.ready():
+        st.stop()
+
+    # 쿠키에서 로그인 정보 확인
+    if 'logged_in' not in st.session_state and cookie_manager.get('logged_in'):
+        st.session_state.logged_in = True
+        st.session_state.user_data = json.loads(cookie_manager.get('user_data'))
+        
     init_session_state()
 
-    if st.sidebar.button("데이터베이스 상태 확인"):
-        check_database()
+    # 디버그 정보 출력
+    st.sidebar.write("Session State:", st.session_state)
 
     # 사이드바에 로그인/로그아웃 버튼
-    if st.session_state.logged_in:
+    if st.session_state.get('logged_in', False):
         if st.sidebar.button("로그아웃"):
             st.session_state.logged_in = False
-            st.session_state.user_data = {}  # 로그아웃 시 사용자 데이터 초기화
+            st.session_state.user_data = {}
             st.rerun()
     
     # 로그인 상태에 따른 화면 표시
-    if not st.session_state.logged_in:
+    if not st.session_state.get('logged_in', False):
         show_login_page()
     else:
         show_main_app()
@@ -121,6 +132,8 @@ def show_login_page():
                     'user_id': user_id,
                     'username': username
                 }
+                cookie_manager.set('logged_in', 'true')
+                cookie_manager.set('user_data', json.dumps(st.session_state.user_data))
                 st.success("로그인 성공!")
                 st.rerun()
             else:
