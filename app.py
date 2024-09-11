@@ -125,6 +125,7 @@ def show_login_page():
         username = st.text_input("사용자명")
         password = st.text_input("비밀번호", type="password")
         if st.button("로그인"):
+            st.write("로그인 시도 중...")  # 디버그 정보
             user_id = authenticate_user(username, password)
             if user_id:
                 st.session_state.logged_in = True
@@ -132,12 +133,13 @@ def show_login_page():
                     'user_id': user_id,
                     'username': username
                 }
-                cookie_manager.set('logged_in', 'true')
-                cookie_manager.set('user_data', json.dumps(st.session_state.user_data))
                 st.success("로그인 성공!")
+                st.write("로그인 후 세션 상태:", st.session_state)  # 디버그 정보
+                time.sleep(2)  # 사용자가 메시지를 볼 수 있도록 잠시 대기
                 st.rerun()
             else:
                 st.error("잘못된 사용자명 또는 비밀번호입니다.")
+                st.write("로그인 실패 후 세션 상태:", st.session_state)  # 디버그 정보
     
     with tab2:
         new_username = st.text_input("새 사용자명")
