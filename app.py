@@ -15,8 +15,8 @@ def main():
     init_db()
 
     # 사용자 인증 상태 확인
-    # if not is_user_authenticated():
-    #    show_login_page()
+    if not is_user_authenticated():
+        show_login_page()
     else:
         show_main_application()
 
