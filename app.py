@@ -33,7 +33,7 @@ def show_login_page():
 
 def show_main_application():
     menu = ["Home", "Basic Info", "My Carbon Footprint", "Carbon Map", "Data Visualization", 
-            "Carbon Credits", "Marketplace", "Profile", "Policy Suggestions", "Eco Game"]
+            "Carbon Credits", "Marketplace", "Profile", "Eco Game"]
     choice = st.sidebar.selectbox("Menu", menu)
 
     if choice == "Home":
@@ -52,8 +52,6 @@ def show_main_application():
         marketplace.show()
     elif choice == "Profile":
         profile.show()
-    elif choice == "Policy Suggestions":
-        policy_suggestions.show()
     elif choice == "Eco Game":
         eco_game.show()
 
