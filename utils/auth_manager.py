@@ -1,5 +1,5 @@
 import jwt
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug_security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 from config import SECRET_KEY
 from models.user import User
