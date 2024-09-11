@@ -122,8 +122,12 @@ def main():
     init_db()
     init_session_state()
     
+    # 쿼리 파라미터 처리 수정
+    query_params = st.experimental_get_query_params()
+    session_id = query_params.get('session_id', [None])[0]
+    
     if 'session_id' not in st.session_state:
-        st.session_state.session_id = st.get_query_params().get('session_id', [None])[0]
+        st.session_state.session_id = session_id
 
     if st.sidebar.button("데이터베이스 상태 확인"):
         check_database()
