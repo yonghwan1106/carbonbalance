@@ -182,7 +182,7 @@ def show_login_page():
                 st.error("이미 존재하는 사용자명입니다.")
 
 def show_main_app():
-    st.title("🌿 탄소중립 코리아")
+    st.title("🌿 Carbon neutrality Korea")
     
     # 사이드바에 메뉴 추가
     menu = st.sidebar.selectbox(
@@ -192,9 +192,9 @@ def show_main_app():
     )
     
     # 메뉴에 따른 페이지 표시 
-    #page_func = import_page(menu)
-    #if page_func:
-    #    page_func()
+    page_func = import_page(menu)
+    if page_func:
+        page_func()
 
     # 세션 상태를 통한 데이터 공유 예시
     st.sidebar.write(f"현재 로그인: {st.session_state.user_data.get('username', '알 수 없음')}")
