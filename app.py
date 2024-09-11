@@ -3,6 +3,27 @@ import sqlite3
 import hashlib
 from pathlib import Path
 from pages import home, basic_info, carbon_calculator, carbon_map, visualization, credit_manager, marketplace, profile, eco_game
+import importlib
+
+# 페이지 모듈 동적 임포트 함수
+def import_page(page_name):
+    try:
+        module = importlib.import_module(f"pages.{page_name}")
+        if hasattr(module, 'show'):
+            return module.show
+        else:
+            st.error(f"'{page_name}' 페이지에 'show' 함수가 정의되어 있지 않습니다.")
+            return None
+    except ImportError:
+        st.error(f"'{page_name}' 페이지 모듈을 찾을 수 없습니다.")
+        return None
+
+# 세션 상태 초기화 함수
+def init_session_state():
+    if 'logged_in' not in st.session_state:
+        st.session_state.logged_in = False
+    if 'user_data' not in st.session_state:
+        st.session_state.user_data = {}
 
 # 데이터베이스 초기화
 def init_db():
@@ -45,26 +66,19 @@ def authenticate_user(username, password):
 def main():
     st.set_page_config(page_title="탄소중립 코리아", page_icon="🌿", layout="wide")
     
-    # 세션 상태 초기화
-    if 'logged_in' not in st.session_state:
-        st.session_state.logged_in = False
-    if 'show_success' not in st.session_state:
-        st.session_state.show_success = False
+    init_session_state()
 
     # 사이드바에 로그인/로그아웃 버튼
     if st.session_state.logged_in:
         if st.sidebar.button("로그아웃"):
             st.session_state.logged_in = False
-            st.session_state.show_success = False
-            st.rerun()
+            st.session_state.user_data = {}  # 로그아웃 시 사용자 데이터 초기화
+            st.experimental_rerun()
     
     # 로그인 상태에 따른 화면 표시
     if not st.session_state.logged_in:
         show_login_page()
     else:
-        if st.session_state.show_success:
-            st.success("로그인 성공!")
-            st.session_state.show_success = False
         show_main_app()
 
 def show_login_page():
@@ -73,19 +87,20 @@ def show_login_page():
     tab1, tab2 = st.tabs(["로그인", "회원가입"])
     
     with tab1:
-        username = st.text_input("사용자명", key="login_username")
-        password = st.text_input("비밀번호", type="password", key="login_password")
+        username = st.text_input("사용자명")
+        password = st.text_input("비밀번호", type="password")
         if st.button("로그인"):
             if authenticate_user(username, password):
                 st.session_state.logged_in = True
-                st.session_state.show_success = True
-                st.rerun()
+                st.session_state.user_data['username'] = username  # 사용자 데이터 저장
+                st.success("로그인 성공!")
+                st.experimental_rerun()
             else:
                 st.error("잘못된 사용자명 또는 비밀번호입니다.")
     
     with tab2:
-        new_username = st.text_input("새 사용자명", key="register_username")
-        new_password = st.text_input("새 비밀번호", type="password", key="register_password")
+        new_username = st.text_input("새 사용자명")
+        new_password = st.text_input("새 비밀번호", type="password")
         if st.button("회원가입"):
             if register_user(new_username, new_password):
                 st.success("회원가입 성공! 이제 로그인할 수 있습니다.")
@@ -122,6 +137,14 @@ def show_main_app():
     elif menu == "에코 게임":
         eco_game.show()
 
+    # 메뉴에 따른 페이지 표시
+    page_func = import_page(menu.lower().replace(" ", "_"))
+    if page_func:
+        page_func()
+
+    # 세션 상태를 통한 데이터 공유 예시
+    st.sidebar.write(f"현재 로그인: {st.session_state.user_data.get('username', '알 수 없음')}")
+    
 if __name__ == "__main__":
     init_db()
     main()
