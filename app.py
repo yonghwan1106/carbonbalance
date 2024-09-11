@@ -33,14 +33,44 @@ def init_session_state():
     if 'user_data' not in st.session_state:
         st.session_state.user_data = {}
 
-# 데이터베이스 초기화
+# 데이터베이스 연결 및 세션 테이블 생성
 def init_db():
-    conn = sqlite3.connect('carbon_neutral.db')
+    conn = sqlite3.connect('sessions.db')
     c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS users
-                 (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS sessions
+                 (session_id TEXT PRIMARY KEY, user_id INTEGER, username TEXT, expires_at DATETIME)''')
     conn.commit()
     conn.close()
+
+def create_session(user_id, username):
+    session_id = str(uuid.uuid4())
+    expires_at = datetime.now() + timedelta(days=1)  # 세션 유효 기간 설정 (예: 1일)
+    
+    conn = sqlite3.connect('sessions.db')
+    c = conn.cursor()
+    c.execute("INSERT INTO sessions (session_id, user_id, username, expires_at) VALUES (?, ?, ?, ?)",
+              (session_id, user_id, username, expires_at))
+    conn.commit()
+    conn.close()
+    
+    return session_id
+
+def get_session(session_id):
+    conn = sqlite3.connect('sessions.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM sessions WHERE session_id = ? AND expires_at > ?", (session_id, datetime.now()))
+    session = c.fetchone()
+    conn.close()
+    
+    return session
+
+def delete_session(session_id):
+    conn = sqlite3.connect('sessions.db')
+    c = conn.cursor()
+    c.execute("DELETE FROM sessions WHERE session_id = ?", (session_id,))
+    conn.commit()
+    conn.close()
+
 
 # 비밀번호 해싱
 def hash_password(password):
@@ -88,33 +118,34 @@ def check_database():
 def main():
     st.set_page_config(page_title="탄소중립 코리아", page_icon="🌿", layout="wide")
     
-    cookie_manager = CookieManager()
+    init_db()
     
-    if not cookie_manager.ready():
-        st.stop()
+    if 'session_id' not in st.session_state:
+        st.session_state.session_id = st.get_query_params().get('session_id', [None])[0]
 
-    # 쿠키에서 로그인 정보 확인
-    if 'logged_in' not in st.session_state and cookie_manager.get('logged_in'):
-        st.session_state.logged_in = True
-        st.session_state.user_data = json.loads(cookie_manager.get('user_data'))
-        
-    init_session_state()
-
-    # 디버그 정보 출력
-    st.sidebar.write("Session State:", st.session_state)
-
-    # 사이드바에 로그인/로그아웃 버튼
-    if st.session_state.get('logged_in', False):
-        if st.sidebar.button("로그아웃"):
-            st.session_state.logged_in = False
-            st.session_state.user_data = {}
-            st.rerun()
+    if st.session_state.session_id:
+        session = get_session(st.session_state.session_id)
+        if session:
+            st.write(f"로그인 상태: {session[2]}")  # username
+            if st.button("로그아웃"):
+                delete_session(st.session_state.session_id)
+                st.session_state.session_id = None
+                st.rerun()
+        else:
+            st.session_state.session_id = None
     
-    # 로그인 상태에 따른 화면 표시
-    if not st.session_state.get('logged_in', False):
-        show_login_page()
-    else:
-        show_main_app()
+    if not st.session_state.session_id:
+        username = st.text_input("사용자명")
+        password = st.text_input("비밀번호", type="password")
+        if st.button("로그인"):
+            # 여기서 실제 인증 로직을 구현해야 합니다
+            user_id = authenticate_user(username, password)  # 이 함수는 별도로 구현해야 합니다
+            if user_id:
+                session_id = create_session(user_id, username)
+                st.session_state.session_id = session_id
+                st.rerun()
+            else:
+                st.error("로그인 실패")
 
 def show_login_page():
     st.title("🌿 탄소중립 코리아에 오신 것을 환영합니다")
