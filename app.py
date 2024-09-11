@@ -73,7 +73,7 @@ def main():
         if st.sidebar.button("로그아웃"):
             st.session_state.logged_in = False
             st.session_state.user_data = {}  # 로그아웃 시 사용자 데이터 초기화
-            st.experimental_rerun()
+            st.rerun()
     
     # 로그인 상태에 따른 화면 표시
     if not st.session_state.logged_in:
@@ -94,7 +94,7 @@ def show_login_page():
                 st.session_state.logged_in = True
                 st.session_state.user_data['username'] = username  # 사용자 데이터 저장
                 st.success("로그인 성공!")
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error("잘못된 사용자명 또는 비밀번호입니다.")
     
@@ -144,7 +144,7 @@ def show_main_app():
 
     # 세션 상태를 통한 데이터 공유 예시
     st.sidebar.write(f"현재 로그인: {st.session_state.user_data.get('username', '알 수 없음')}")
-    
+
 if __name__ == "__main__":
     init_db()
     main()
