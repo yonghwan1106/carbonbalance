@@ -13,4 +13,3 @@ jwt
 werkzeug
 python-dotenv
 streamlit-cookies-manager
-sqlite3
