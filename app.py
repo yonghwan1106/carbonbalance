@@ -2,7 +2,8 @@ import streamlit as st
 import sys
 import os
 from utils.db_manager import init_db
-from utils.auth_manager import is_user_authenticated, login_user, logout_user
+from utils.auth_manager import login_user, logout_user
+# 일단 주석 is_user_authenticated
 from pages import home, basic_info, carbon_calculator, carbon_map, visualization, policy_suggestions, eco_game, marketplace, profile, credit_manager
 
 # 프로젝트 루트 디렉토리를 sys.path에 추가
