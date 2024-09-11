@@ -11,12 +11,12 @@ from datetime import datetime, timedelta
 def import_page(page_name):
     try:
         # 디버그 정보 출력
-        st.write(f"Trying to import: pages.{page_name}")
+        # st.write(f"Trying to import: pages.{page_name}")
         
-        module = importlib.import_module(f"pages.{page_name}")
+        #module = importlib.import_module(f"pages.{page_name}")
         
         # 성공적으로 임포트된 경우
-        st.write(f"Successfully imported: pages.{page_name}")
+        #st.write(f"Successfully imported: pages.{page_name}")
         
         if hasattr(module, 'show'):
             return module.show
@@ -147,7 +147,7 @@ def main():
         show_login_page()
 
 def show_login_page():
-    st.title("🌿 탄소중립 코리아에 오신 것을 환영합니다")
+    st.title("🌿 Carbon neutrality Korea에 오신 것을 환영합니다")
     
     tab1, tab2 = st.tabs(["로그인", "회원가입"])
     
