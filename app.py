@@ -11,14 +11,19 @@ from streamlit_cookies_manager import CookieManager
 # 페이지 모듈 동적 임포트 함수
 def import_page(page_name):
     try:
+        st.write(f"페이지 로드 시도: {page_name}")
         module = importlib.import_module(f"pages.{page_name}")
         if hasattr(module, 'show'):
+            st.write(f"'{page_name}' 페이지 로드 성공")
             return module.show
         else:
             st.error(f"'{page_name}' 페이지에 'show' 함수가 정의되어 있지 않습니다.")
             return None
     except ImportError as e:
         st.error(f"'{page_name}' 페이지 모듈을 찾을 수 없습니다. 오류: {str(e)}")
+        return None
+    except Exception as e:
+        st.error(f"'{page_name}' 페이지 로드 중 예상치 못한 오류 발생: {str(e)}")
         return None
 
 # 세션 상태 초기화 함수
@@ -175,6 +180,11 @@ def show_login_page():
                 st.error("이미 존재하는 사용자명입니다.")
 
 def show_main_app():
+    st.sidebar.write("디버그 정보:")
+    st.sidebar.write(f"세션 ID: {st.session_state.session_id}")
+    st.sidebar.write(f"로그인 상태: {st.session_state.logged_in}")
+    st.sidebar.write(f"사용자 데이터: {st.session_state.user_data}")
+
     # 사이드바에 메뉴 추가
     menu = st.sidebar.selectbox(
         "메뉴를 선택하세요",
@@ -183,9 +193,20 @@ def show_main_app():
     )
     
     # 메뉴에 따른 페이지 표시 
-    page_func = import_page(menu)
-    if page_func:
-        page_func()
+    try:
+        page_func = import_page(menu)
+        if page_func:
+            page_func()
+        else:
+            st.error(f"'{menu}' 페이지를 로드할 수 없습니다.")
+    except Exception as e:
+        st.error(f"페이지 로드 중 오류 발생: {str(e)}")
+
+    # 기본 페이지 (홈) 표시
+    if menu == "home":
+        st.title("🌿 Carbon neutrality Korea")
+        st.write("탄소중립 코리아에 오신 것을 환영합니다!")
+        # 여기에 홈 페이지 내용을 추가하세요
 
     # 세션 상태를 통한 데이터 공유 예시
     st.sidebar.write(f"현재 로그인: {st.session_state.user_data.get('username', '알 수 없음')}")
