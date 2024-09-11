@@ -12,3 +12,4 @@ python-dotenv==0.20.0
 jwt
 werkzeug
 python-dotenv
+streamlit-cookies-manager
