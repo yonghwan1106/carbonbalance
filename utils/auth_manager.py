@@ -5,12 +5,6 @@ from config import SECRET_KEY
 from models.user import User
 from utils.db_manager import get_db_session
 
-def show_login_page():
-    """
-    Render the login page for unauthenticated users.
-    """
-    # 로그인 페이지 렌더링 로직 구현
-    pass
 
 def authenticate_user(username, password):
     session = get_db_session()
