@@ -5,6 +5,13 @@ import streamlit as st
 from supabase import create_client, Client
 import uuid
 from datetime import datetime, timedelta
+import logging
+
+# Supabase 클라이언트 설정
+url: str = st.secrets["supabase_url"]
+key: str = st.secrets["supabase_key"]
+supabase: Client = create_client(url, key)
+
 
 class CreditManager:
     def __init__(self, url: str, key: str):
@@ -74,8 +81,9 @@ class CreditManager:
             for credit in expired_credits:
                 self.supabase.table("carbon_credits").update({"is_active": False}).eq("id", credit["id"]).execute()
                 self.add_transaction("expire", credit["id"], credit["amount"], from_owner=credit["owner"])
+            logging.info(f"{len(expired_credits)} 크레딧이 만료 처리되었습니다.")
         except Exception as e:
-            raise Exception(f"크레딧 만료 처리 중 오류 발생: {str(e)}")
+            logging.error(f"크레딧 만료 처리 중 오류 발생: {str(e)}")
 
     def get_transaction_history(self, owner_id: int = None):
         try:
