@@ -1,16 +1,10 @@
 # 📊 credit_manager.py
 # 🏷️ 탄소 크레딧 관리 시스템
 
-import streamlit as st
 from supabase import create_client, Client
 import uuid
 from datetime import datetime, timedelta
 import logging
-
-# Supabase 클라이언트 설정
-url: str = st.secrets["supabase_url"]
-key: str = st.secrets["supabase_key"]
-supabase: Client = create_client(url, key)
 
 
 class CreditManager:
@@ -141,8 +135,14 @@ class CreditManager:
 
 # 사용 예시
 if __name__ == "__main__":
+    import streamlit as st
+
+    # Supabase 클라이언트 설정
+    url: str = st.secrets["supabase_url"]
+    key: str = st.secrets["supabase_key"]
+
     try:
-        manager = CreditManager()
+        manager = CreditManager(url, key)
         
         # 실제 존재하는 사용자 ID를 사용 (예: 5번 사용자 sano3383)
         test_user_id = 5
