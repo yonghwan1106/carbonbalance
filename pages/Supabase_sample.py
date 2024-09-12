@@ -2,11 +2,10 @@ import streamlit as st
 from supabase import create_client, Client
 import os
 
-# Supabase 프로젝트 URL과 API 키 설정
-# (보안을 위해 환경 변수 사용을 권장합니다)
-supabase_url = st.secrets["https://knoluipowadknsjabcqo.supabase.co"]
-supabase_key = st.secrets["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtub2x1aXBvd2Fka25zamFiY3FvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjYxMDA0MTksImV4cCI6MjA0MTY3NjQxOX0.LDgUKgjnglG5nNQ_IH4mzmEM89McJafbFrbvhoSETSQ"]
-
+# 환경 변수에서 Supabase 설정 가져오기
+supabase_url = st.secrets["SUPABASE_URL"]
+supabase_key = st.secrets["SUPABASE_KEY"]
+ 
 # Supabase 클라이언트 생성
 supabase: Client = create_client(supabase_url, supabase_key)
 
