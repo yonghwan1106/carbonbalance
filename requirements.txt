@@ -11,5 +11,4 @@ psycopg2-binary
 PyJWT
 werkzeug
 python-dotenv
-streamlit-cookies-manager
 supabase
