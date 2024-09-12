@@ -3,9 +3,9 @@ from supabase import create_client, Client
 import os
 
 # 환경 변수에서 Supabase 설정 가져오기
-supabase_url = st.secrets["SUPABASE_URL"]
-supabase_key = st.secrets["SUPABASE_KEY"]
- 
+supabase_url = st.secrets["supabase_url"]
+supabase_key = st.secrets["supabase_key"] 
+
 # Supabase 클라이언트 생성
 supabase: Client = create_client(supabase_url, supabase_key)
 
