@@ -1,154 +1,104 @@
 import streamlit as st
-import sqlite3
-import hashlib
-from pathlib import Path
-from pages import home, basic_info, carbon_calculator, carbon_map, visualization, credit_manager, marketplace, profile, eco_game
-import importlib
+import pandas as pd
+from utils.credit_manager import CreditManager
 
-# 페이지 모듈 동적 임포트 함수
-def import_page(page_name):
+# CreditManager 인스턴스 생성
+manager = CreditManager()
+
+def get_user_credits(user_id):
+    return manager.get_credit_balance(user_id)
+
+def get_transaction_history(user_id):
+    transactions = manager.get_transaction_history(user_id)
+    df = pd.DataFrame(transactions)
+    if not df.empty:
+        df['date'] = pd.to_datetime(df['date'])
+        df = df.sort_values('date', ascending=False)
+    return df
+
+def execute_transaction(user_id, transaction_type, amount):
     try:
-        module = importlib.import_module(f"pages.{page_name}")
-        if hasattr(module, 'show'):
-            return module.show
-        else:
-            st.error(f"'{page_name}' 페이지에 'show' 함수가 정의되어 있지 않습니다.")
-            return None
-    except ImportError:
-        st.error(f"'{page_name}' 페이지 모듈을 찾을 수 없습니다.")
-        return None
-
-# 세션 상태 초기화 함수
-def init_session_state():
-    if 'logged_in' not in st.session_state:
-        st.session_state.logged_in = False
-    if 'user_data' not in st.session_state:
-        st.session_state.user_data = {}
-
-# 데이터베이스 초기화
-def init_db():
-    conn = sqlite3.connect('carbon_neutral.db')
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS users
-                 (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)''')
-    conn.commit()
-    conn.close()
-
-# 비밀번호 해싱
-def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
-
-# 사용자 등록
-def register_user(username, password):
-    conn = sqlite3.connect('carbon_neutral.db')
-    c = conn.cursor()
-    hashed_password = hash_password(password)
-    try:
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, hashed_password))
-        conn.commit()
+        if transaction_type == "buy":
+            credit_id = manager.issue_credit(amount, user_id)
+            st.success(f"{amount} 크레딧이 성공적으로 구매되었습니다. 크레딧 ID: {credit_id}")
+        elif transaction_type == "sell":
+            user_credits = [credit for credit in manager.credits.values() if credit.owner == user_id and credit.is_active]
+            if user_credits:
+                credit_to_sell = user_credits[0]
+                manager.retire_credit(credit_to_sell.id, amount)
+                st.success(f"{amount} 크레딧이 성공적으로 판매되었습니다.")
+            else:
+                st.error("판매할 크레딧이 없습니다.")
         return True
-    except sqlite3.IntegrityError:
+    except ValueError as e:
+        st.error(f"거래 실패: {str(e)}")
         return False
-    finally:
-        conn.close()
 
-# 사용자 인증
-def authenticate_user(username, password):
-    conn = sqlite3.connect('carbon_neutral.db')
-    c = conn.cursor()
-    hashed_password = hash_password(password)
-    c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, hashed_password))
-    result = c.fetchone()
-    conn.close()
-    return result is not None
+st.title("💰 탄소 크레딧 거래")
 
-# 메인 앱
-def main():
-    st.set_page_config(page_title="탄소중립 코리아", page_icon="🌿", layout="wide")
-    
-    init_session_state()
+# 탄소 크레딧 설명 추가
+with st.expander("탄소 크레딧이란?"):
+    st.write("""
+    탄소 크레딧은 온실가스 배출량을 줄이거나 제거하는 노력을 수치화한 것입니다. 
+    1 탄소 크레딧은 일반적으로 1톤의 이산화탄소 또는 이에 상응하는 다른 온실가스의 감축을 나타냅니다.
 
-    # 사이드바에 로그인/로그아웃 버튼
-    if st.session_state.logged_in:
-        if st.sidebar.button("로그아웃"):
-            st.session_state.logged_in = False
-            st.session_state.user_data = {}  # 로그아웃 시 사용자 데이터 초기화
-            st.rerun()
-    
-    # 로그인 상태에 따른 화면 표시
-    if not st.session_state.logged_in:
-        show_login_page()
-    else:
-        show_main_app()
+    **탄소 크레딧의 개념:**
+    - 기업이나 개인이 온실가스 배출을 줄이면 크레딧을 얻습니다.
+    - 배출 목표를 초과 달성한 경우, 초과분을 크레딧으로 받아 다른 기업에 판매할 수 있습니다.
+    - 반대로, 배출 목표를 달성하지 못한 기업은 크레딧을 구매하여 부족분을 보완할 수 있습니다.
 
-def show_login_page():
-    st.title("🌿 탄소중립 코리아에 오신 것을 환영합니다")
-    
-    tab1, tab2 = st.tabs(["로그인", "회원가입"])
-    
-    with tab1:
-        username = st.text_input("사용자명")
-        password = st.text_input("비밀번호", type="password")
-        if st.button("로그인"):
-            user = authenticate_user(username, password)
-            if user:
-                st.session_state.logged_in = True
-                st.session_state.user_data = {
-                    'user_id': user.id,  # user.id가 실제 사용자 ID를 반환하는지 확인
-                    'username': username
-                }
-                st.success("로그인 성공!")
-                st.rerun()
-            else:
-                st.error("잘못된 사용자명 또는 비밀번호입니다.")
-    
-    with tab2:
-        new_username = st.text_input("새 사용자명")
-        new_password = st.text_input("새 비밀번호", type="password")
-        if st.button("회원가입"):
-            if register_user(new_username, new_password):
-                st.success("회원가입 성공! 이제 로그인할 수 있습니다.")
-            else:
-                st.error("이미 존재하는 사용자명입니다.")
+    **거래 방식:**
+    1. 자발적 시장: 기업이나 개인이 자발적으로 참여하는 시장입니다.
+    2. 규제 시장: 정부 규제에 따라 의무적으로 참여해야 하는 시장입니다.
 
-def show_main_app():
-    st.title("🌿 탄소중립 코리아")
-    
-    # 사이드바에 메뉴 추가
-    menu = st.sidebar.selectbox(
-        "메뉴를 선택하세요",
-        ["홈", "기본 정보", "탄소 계산기", "탄소 지도", "데이터 시각화", 
-         "탄소 크레딧", "마켓플레이스", "프로필", "에코 게임"]
-    )
-    
-    # 선택된 메뉴에 따라 해당 페이지 표시
-    if menu == "홈":
-        home.show()
-    elif menu == "기본 정보":
-        basic_info.show()
-    elif menu == "탄소 계산기":
-        carbon_calculator.show()
-    elif menu == "탄소 지도":
-        carbon_map.show()
-    elif menu == "데이터 시각화":
-        visualization.show()
-    elif menu == "탄소 크레딧":
-        credit_manager.show()
-    elif menu == "마켓플레이스":
-        marketplace.show()
-    elif menu == "프로필":
-        profile.show()
-    elif menu == "에코 게임":
-        eco_game.show()
+    탄소 크레딧 거래는 온실가스 감축을 경제적으로 유도하고, 
+    전 세계적으로 효율적인 탄소 감축을 달성하는 데 도움을 줍니다.
+    """)
 
-    # 메뉴에 따른 페이지 표시
-    page_func = import_page(menu.lower().replace(" ", "_"))
-    if page_func:
-        page_func()
+st.write("여러분의 노력을 크레딧으로 보상받고 거래해보세요.")
 
-    # 세션 상태를 통한 데이터 공유 예시
-    st.sidebar.write(f"현재 로그인: {st.session_state.user_data.get('username', '알 수 없음')}")
+# 사용자 선택
+user_id = st.text_input("사용자 ID를 입력하세요:", value="user123")
 
-if __name__ == "__main__":
-    init_db()
-    main()
+# 사용자 크레딧 현황
+user_credits = get_user_credits(user_id)
+st.subheader("보유 탄소 크레딧")
+st.write(f"현재 보유 크레딧: {user_credits} 크레딧")
+
+# 거래 섹션
+st.subheader("크레딧 거래")
+transaction_type = st.selectbox("거래 유형 선택", ["buy", "sell"])
+
+# max_value를 조건부로 설정
+if transaction_type == "sell":
+    max_value = min(int(user_credits), 1000)  # user_credits와 1000 중 작은 값
+else:
+    max_value = 1000
+
+amount = st.number_input("거래할 크레딧 양", min_value=1, max_value=max_value, value=1)
+
+if st.button("거래 실행"):
+    if execute_transaction(user_id, transaction_type, amount):
+        # 거래 후 업데이트된 크레딧 현황
+        user_credits = get_user_credits(user_id)
+        st.write(f"현재 보유 크레딧: {user_credits} 크레딧")
+
+# 거래 내역 확인
+st.subheader("거래 내역")
+transaction_history = get_transaction_history(user_id)
+if not transaction_history.empty:
+    st.write(transaction_history)
+else:
+    st.write("거래 내역이 없습니다.")
+
+# 만료된 크레딧 처리
+manager.expire_credits()
+
+# 추가 정보
+st.sidebar.header("💡 알고 계셨나요?")
+st.sidebar.info("""
+- 전 세계적으로 탄소 크레딧 시장의 규모는 계속 성장하고 있습니다.
+- 많은 기업들이 탄소 중립을 목표로 하고 있으며, 이를 위해 탄소 크레딧을 활용합니다.
+- 개인도 일상생활에서의 탄소 감축 노력을 통해 크레딧을 얻을 수 있습니다.
+- 탄소 크레딧 거래는 환경 보호와 경제적 이익을 동시에 추구할 수 있는 방법입니다.
+""")
