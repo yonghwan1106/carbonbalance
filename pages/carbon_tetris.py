@@ -1,7 +1,6 @@
-import time
-import os
-import msvcrt  # Windows용. 다른 OS에서는 다른 방식의 입력이 필요할 수 있습니다.
+import streamlit as st
 import random
+import time
 
 class CarbonBlock:
     def __init__(self, shape, carbon_value):
@@ -14,6 +13,8 @@ class CarbonTetris:
         self.height = height
         self.grid = [[0 for _ in range(width)] for _ in range(height)]
         self.current_block = None
+        self.current_block_x = 0
+        self.current_block_y = 0
         self.score = 0
         self.carbon_balance = 0
 
@@ -29,6 +30,8 @@ class CarbonTetris:
         shape = random.choice(shapes)
         carbon_value = carbon_values[shapes.index(shape)]
         self.current_block = CarbonBlock(shape, carbon_value)
+        self.current_block_x = self.width // 2 - len(self.current_block.shape[0]) // 2
+        self.current_block_y = 0
 
     def move(self, direction):
         if self.current_block:
@@ -91,12 +94,6 @@ class CarbonTetris:
         self.score += lines_cleared * 100  # 줄 제거 보너스
         self.new_block()
 
-    def new_block(self):
-        # ... (이전 코드 유지)
-        self.current_block_x = self.width // 2 - len(self.current_block.shape[0]) // 2
-        self.current_block_y = 0
-
-# 게임 상태 업데이트 함수
 def update_game_state(game):
     if game.current_block is None:
         game.new_block()
@@ -110,46 +107,75 @@ def update_game_state(game):
     
     return "Continue"
 
-def print_game(game):
-    os.system('cls' if os.name == 'nt' else 'clear')  # 화면 지우기
-    print(f"Score: {game.score}")
-    print(f"Carbon Balance: {game.carbon_balance}")
-    for row in game.grid:
-        print(''.join(['□' if cell == 0 else '■' for cell in row]))
-    print("\nControls: A (Left), D (Right), W (Rotate), S (Drop), Q (Quit)")
-
-def get_input():
-    if msvcrt.kbhit():
-        key = msvcrt.getch().decode('utf-8').lower()
-        return key
-    return None
+def visualize_game(game):
+    st.write(f"Score: {game.score}")
+    st.write(f"Carbon Balance: {game.carbon_balance}")
+    
+    # 게임 그리드를 HTML 테이블로 표현
+    html = "<table style='border-collapse: collapse;'>"
+    for i, row in enumerate(game.grid):
+        html += "<tr>"
+        for j, cell in enumerate(row):
+            color = "lightblue" if cell else "white"
+            # 현재 블록 위치 표시
+            if game.current_block and game.current_block_y <= i < game.current_block_y + len(game.current_block.shape) and \
+               game.current_block_x <= j < game.current_block_x + len(game.current_block.shape[0]):
+                if game.current_block.shape[i - game.current_block_y][j - game.current_block_x]:
+                    color = "blue"
+            html += f"<td style='width: 20px; height: 20px; border: 1px solid gray; background-color: {color};'></td>"
+        html += "</tr>"
+    html += "</table>"
+    
+    st.markdown(html, unsafe_allow_html=True)
 
 def main():
-    game = CarbonTetris(10, 20)
-    game.new_block()
+    st.title("Carbon Neutral Tetris")
+
+    # 세션 상태 초기화
+    if 'game' not in st.session_state:
+        st.session_state.game = CarbonTetris(10, 20)
+        st.session_state.game.new_block()
     
-    while True:
-        print_game(game)
-        key = get_input()
-        
-        if key == 'a':
-            game.move('left')
-        elif key == 'd':
-            game.move('right')
-        elif key == 'w':
-            game.rotate()
-        elif key == 's':
-            game.drop()
-        elif key == 'q':
-            print("Game Over!")
-            break
-        
-        status = update_game_state(game)
+    if 'game_over' not in st.session_state:
+        st.session_state.game_over = False
+
+    # 게임 컨트롤
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        if st.button("Left") and not st.session_state.game_over:
+            st.session_state.game.move('left')
+    with col2:
+        if st.button("Right") and not st.session_state.game_over:
+            st.session_state.game.move('right')
+    with col3:
+        if st.button("Rotate") and not st.session_state.game_over:
+            st.session_state.game.rotate()
+    with col4:
+        if st.button("Drop") and not st.session_state.game_over:
+            st.session_state.game.drop()
+
+    # 게임 상태 업데이트
+    if not st.session_state.game_over:
+        status = update_game_state(st.session_state.game)
         if status == "Game Over":
-            print("Game Over!")
-            break
-        
-        time.sleep(0.1)  # 게임 속도 조절
+            st.session_state.game_over = True
+
+    # 게임 시각화
+    visualize_game(st.session_state.game)
+
+    # 게임 오버 체크
+    if st.session_state.game_over:
+        st.error("Game Over!")
+        if st.button("Restart"):
+            st.session_state.game = CarbonTetris(10, 20)
+            st.session_state.game.new_block()
+            st.session_state.game_over = False
+            st.rerun()
+
+    # 게임이 진행 중일 때만 자동 리프레시
+    if not st.session_state.game_over:
+        time.sleep(0.5)  # 게임 속도 조절
+        st.rerun()
 
 if __name__ == "__main__":
     main()
