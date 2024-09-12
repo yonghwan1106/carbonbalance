@@ -10,6 +10,10 @@ from pages import home, basic_info, carbon_calculator, carbon_map, visualization
 import importlib
 import uuid
 from datetime import datetime, timedelta
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Supabase 클라이언트 초기화
 @st.cache_resource
@@ -78,13 +82,28 @@ def authenticate_user(username, password):
 def create_session(user_id, username):
     session_id = str(uuid.uuid4())
     expires_at = datetime.now() + timedelta(days=1)
-    supabase.table('sessions').insert({
-        "session_id": session_id,
-        "user_id": user_id,
-        "username": username,
-        "expires_at": expires_at.isoformat()
-    }).execute()
-    return session_id
+    logger.info(f"Attempting to create session for user {username}")
+    try:
+        response = supabase.table('sessions').insert({
+            "session_id": session_id,
+            "user_id": user_id,
+            "username": username,
+            "expires_at": expires_at.isoformat()
+        }).execute()
+        
+        logger.info(f"Session creation response: {response}")
+        
+        if response.data:
+            return session_id
+        else:
+            logger.error("Session creation failed: No data in response")
+            return None
+    except Exception as e:
+        logger.error(f"Error creating session: {str(e)}")
+        if hasattr(e, 'json'):
+            error_details = e.json()
+            logger.error(f"Detailed error: {error_details}")
+        return None
 
 # 세션 확인
 def get_session(session_id):
