@@ -1,7 +1,8 @@
+import streamlit as st
+
 # 페이지 설정을 스크립트 최상단에 배치
 st.set_page_config(page_title="Carbon neutrality Korea", page_icon="🌿", layout="wide")
 
-import streamlit as st
 from supabase import create_client, Client
 import hashlib
 from pathlib import Path
