@@ -55,11 +55,19 @@ def register_user(username, password):
     hashed_password = hash_password(password)
     try:
         response = supabase.table('users').insert({"username": username, "password": hashed_password}).execute()
-        return True if response.data else False
+        if response.data:
+            return True
+        else:
+            st.error("회원가입 실패: 응답에 데이터가 없습니다.")
+            return False
     except Exception as e:
         st.error(f"회원가입 중 오류 발생: {str(e)}")
+        if '23505' in str(e):  # 고유 제약 조건 위반 오류 코드
+            st.error("이미 존재하는 사용자명입니다.")
+        elif '42501' in str(e):  # 권한 부족 오류 코드
+            st.error("데이터베이스 권한 오류. 관리자에게 문의하세요.")
         return False
-
+        
 # 사용자 인증
 def authenticate_user(username, password):
     hashed_password = hash_password(password)
