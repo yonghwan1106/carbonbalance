@@ -14,6 +14,7 @@ def init_connection() -> Client:
     key = st.secrets["supabase_key"]
     return create_client(url, key)
 
+# 전역 변수로 Supabase 클라이언트 설정
 supabase = init_connection()
 
 # 페이지 모듈 동적 임포트 함수
@@ -87,10 +88,11 @@ def delete_session(session_id):
 # 메인 앱
 def main():
     st.set_page_config(page_title="Carbon neutrality Korea", page_icon="🌿", layout="wide")
-    
-    init_session_state()
 
-    if 'user' in st.session_state and st.session_state.user:
+    if 'user' not in st.session_state:
+        st.session_state.user = None
+
+    if st.session_state.user:
         show_main_app()
     else:
         show_login_page()
