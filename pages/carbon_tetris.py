@@ -1,3 +1,6 @@
+import time
+import os
+import msvcrt  # Windows용. 다른 OS에서는 다른 방식의 입력이 필요할 수 있습니다.
 import random
 
 class CarbonBlock:
@@ -106,3 +109,47 @@ def update_game_state(game):
             return "Game Over"
     
     return "Continue"
+
+def print_game(game):
+    os.system('cls' if os.name == 'nt' else 'clear')  # 화면 지우기
+    print(f"Score: {game.score}")
+    print(f"Carbon Balance: {game.carbon_balance}")
+    for row in game.grid:
+        print(''.join(['□' if cell == 0 else '■' for cell in row]))
+    print("\nControls: A (Left), D (Right), W (Rotate), S (Drop), Q (Quit)")
+
+def get_input():
+    if msvcrt.kbhit():
+        key = msvcrt.getch().decode('utf-8').lower()
+        return key
+    return None
+
+def main():
+    game = CarbonTetris(10, 20)
+    game.new_block()
+    
+    while True:
+        print_game(game)
+        key = get_input()
+        
+        if key == 'a':
+            game.move('left')
+        elif key == 'd':
+            game.move('right')
+        elif key == 'w':
+            game.rotate()
+        elif key == 's':
+            game.drop()
+        elif key == 'q':
+            print("Game Over!")
+            break
+        
+        status = update_game_state(game)
+        if status == "Game Over":
+            print("Game Over!")
+            break
+        
+        time.sleep(0.1)  # 게임 속도 조절
+
+if __name__ == "__main__":
+    main()
