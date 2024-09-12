@@ -6,12 +6,6 @@ from supabase import create_client, Client
 import uuid
 from datetime import datetime, timedelta
 
-# Supabase 클라이언트 설정
-url: str = st.secrets["supabase_url"]
-key: str = st.secrets["supabase_key"]
-supabase: Client = create_client(url, key)
-
-
 class CreditManager:
     def __init__(self, url: str, key: str):
         self.supabase: Client = create_client(url, key)
