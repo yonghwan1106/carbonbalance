@@ -12,3 +12,4 @@ PyJWT
 werkzeug
 python-dotenv
 streamlit-cookies-manager
+supabase
