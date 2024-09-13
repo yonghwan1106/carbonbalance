@@ -1,6 +1,10 @@
 import streamlit as st
 import pandas as pd
-from .credit_manager import CreditManager
+import os
+import sys
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(current_dir)
+from credit_manager import CreditManager
 
 # Supabase 클라이언트 설정은 credit_manager.py에서 이미 처리되었으므로 여기서는 제거합니다.
 # url: str = st.secrets["supabase_url"]
