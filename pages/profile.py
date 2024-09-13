@@ -1,3 +1,6 @@
+# 🙋‍♂️ Profile Page
+# This file contains the code for the user profile page in the Carbon Neutrality Korea web app.
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -45,29 +48,30 @@ def get_user_data(user_id):
 
 def show():
     st.title("🙋 내 프로필")
-
-    # 실제 애플리케이션에서는 로그인한 사용자의 ID를 사용해야 합니다.
-    # 여기서는 예시로 user_id를 1로 설정합니다.
-    user_id = 1
     
+    # 세션에서 사용자 정보 가져오기
+    if 'user' not in st.session_state or not st.session_state.user:
+        st.error("로그인이 필요합니다.")
+        return
+    
+    user_id = st.session_state.user['id']
     user_data = get_user_data(user_id)
+    
     if user_data is None:
         return
-
+    
     col1, col2 = st.columns([2, 1])
-
     with col1:
         st.subheader("개인 정보")
         st.write(f"이름: {user_data['name']}")
         st.write(f"이메일: {user_data['email']}")
         st.write(f"가입일: {user_data['join_date']}")
-
         if st.button("개인 정보 수정"):
             st.write("개인 정보 수정 기능은 아직 구현되지 않았습니다.")
-
+    
     with col2:
         st.image("https://via.placeholder.com/150", caption="프로필 사진")
-
+    
     st.subheader("🎯 탄소 감축 목표 및 성과")
     
     if user_data['carbon_goal'] > 0:
@@ -81,25 +85,24 @@ def show():
         st.write(f"달성률: {progress_percentage:.1f}%")
     else:
         st.write("탄소 감축 목표가 설정되지 않았습니다.")
-
+    
     # 월별 탄소 발자국 차트 (실제 데이터를 사용하려면 추가 쿼리 필요)
     months = pd.date_range(start="2023-01-01", end="2023-12-31", freq='M')
     carbon_data = pd.DataFrame({
         'month': months,
         'carbon': [500, 480, 460, 440, 420, 400, 380, 360, 340, 320, 300, 280]
     })
-
     fig = px.line(carbon_data, x='month', y='carbon', title='월별 탄소 발자국')
     st.plotly_chart(fig)
-
+    
     st.subheader("🏅 획득한 배지")
     for badge in user_data['badges']:
         st.markdown(f"- {badge}")
-
+    
     st.subheader("🏆 업적")
     for achievement in user_data['achievements']:
         st.markdown(f"- {achievement['name']} ({achievement['date']})")
-
+    
     st.subheader("📊 통계")
     col1, col2, col3 = st.columns(3)
     col1.metric("총 감축량", f"{user_data['current_carbon']} kg CO2e", "15%")
