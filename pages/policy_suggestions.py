@@ -46,28 +46,39 @@ def get_ai_policy_suggestions(region, emissions_data):
 def show():
     st.title("🌿 지역 맞춤형 친환경 정책 제안 플랫폼")
 
-    # 데이터 로드
-    # df = load_gyeonggi_data()
+    # CSV 데이터 파일 로드
+    csv_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'gyeonggi_carbon_data_2022.csv')
+    try:
+        df = pd.read_csv(csv_path)
+    except Exception as e:
+        st.error(f"데이터 로딩 중 오류가 발생했습니다: {str(e)}")
+        st.stop()
 
     # 지역 선택
-    regions = df['지역'].unique()
+    regions = df['지자체명'].unique()
     selected_region = st.selectbox("🏙️ 분석할 지역을 선택하세요", regions)
 
     if selected_region:
         # 선택된 지역의 데이터
-        region_data = df[df['지역'] == selected_region]
-
+        region_data = df[df['지자체명'] == selected_region]  # '지역' 대신 '지자체명' 사용
+        
         # 데이터 시각화
         st.subheader(f"📊 {selected_region} 탄소 배출 현황")
-        fig = px.line(region_data, x='연도', y='탄소배출량', title=f"{selected_region} 연간 탄소 배출량 추이")
+        
+        # 여기서 '탄소배출량' 열이 없으므로, 적절한 열을 선택하거나 계산해야 합니다.
+        # 예: 모든 배출량을 합산
+        region_data['총탄소배출량'] = region_data['배출_건물_전기'] + region_data['배출_건물_지역난방'] + region_data['배출_건물_가스'] + region_data['탄소배출_수송']
+        
+        fig = px.line(region_data, x='연도', y='총탄소배출량', title=f"{selected_region} 연간 탄소 배출량 추이")
         st.plotly_chart(fig)
-
-        # 부문별 배출량 비교
-        sectors = ['가정', '상업', '산업', '수송', '공공', '기타']
-        sector_data = region_data[sectors].iloc[-1]  # 최근 연도의 데이터
-        fig_sector = px.pie(values=sector_data.values, names=sector_data.index, title=f"{selected_region} 부문별 탄소 배출 비중")
-        st.plotly_chart(fig_sector)
-
+    
+    # 부문별 배출량 비교
+    sectors = ['배출_건물_전기', '배출_건물_지역난방', '배출_건물_가스', '탄소배출_수송']
+    sector_data = region_data[sectors].iloc[-1]  # 최근 연도의 데이터
+    fig_sector = px.pie(values=sector_data.values, names=sector_data.index, title=f"{selected_region} 부문별 탄소 배출 비중")
+    st.plotly_chart(fig_sector)
+    
+   
         # 배출 트렌드 분석
         trend_analysis = analyze_emissions_trend(region_data)
         st.subheader("📈 배출 트렌드 분석")
