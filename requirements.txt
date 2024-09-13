@@ -6,7 +6,6 @@ geopandas
 pyproj
 shapely
 fiona
-sqlalchemy
 psycopg2-binary
 PyJWT
 werkzeug
