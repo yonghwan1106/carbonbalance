@@ -79,37 +79,37 @@ def show():
     st.plotly_chart(fig_sector)
     
    
-        # 배출 트렌드 분석
-        trend_analysis = analyze_emissions_trend(region_data)
-        st.subheader("📈 배출 트렌드 분석")
-        st.write(trend_analysis)
+    # 배출 트렌드 분석
+    trend_analysis = analyze_emissions_trend(region_data)
+    st.subheader("📈 배출 트렌드 분석")
+    st.write(trend_analysis)
 
-        # AI 기반 정책 제안 버튼
-        if st.button("🤖 AI 정책 제안 생성"):
-            with st.spinner("AI가 정책을 생성 중입니다..."):
-                emissions_data = {
-                    'total_emissions': region_data['탄소배출량'].iloc[-1],
-                    'trend': trend_analysis,
-                    'sector_breakdown': sector_data.to_dict()
-                }
-                policy_suggestions = get_ai_policy_suggestions(selected_region, emissions_data)
-            
-            st.subheader("💡 AI 기반 정책 제안")
-            st.write(policy_suggestions)
+    # AI 기반 정책 제안 버튼
+    if st.button("🤖 AI 정책 제안 생성"):
+        with st.spinner("AI가 정책을 생성 중입니다..."):
+            emissions_data = {
+                'total_emissions': region_data['탄소배출량'].iloc[-1],
+                'trend': trend_analysis,
+                'sector_breakdown': sector_data.to_dict()
+            }
+            policy_suggestions = get_ai_policy_suggestions(selected_region, emissions_data)
+        
+        st.subheader("💡 AI 기반 정책 제안")
+        st.write(policy_suggestions)
 
-        # 정책 효과 시뮬레이션 (간단한 예시)
-        st.subheader("🔬 정책 효과 시뮬레이션")
-        reduction_percentage = st.slider("예상 감축률 (%)", 0, 100, 10)
-        current_emissions = region_data['탄소배출량'].iloc[-1]
-        simulated_emissions = current_emissions * (1 - reduction_percentage / 100)
+    # 정책 효과 시뮬레이션 (간단한 예시)
+    st.subheader("🔬 정책 효과 시뮬레이션")
+    reduction_percentage = st.slider("예상 감축률 (%)", 0, 100, 10)
+    current_emissions = region_data['탄소배출량'].iloc[-1]
+    simulated_emissions = current_emissions * (1 - reduction_percentage / 100)
 
-        fig_simulation = px.bar(x=['현재 배출량', '정책 적용 후 예상 배출량'], 
-                                y=[current_emissions, simulated_emissions],
-                                title="정책 적용 효과 시뮬레이션")
-        st.plotly_chart(fig_simulation)
+    fig_simulation = px.bar(x=['현재 배출량', '정책 적용 후 예상 배출량'], 
+                            y=[current_emissions, simulated_emissions],
+                            title="정책 적용 효과 시뮬레이션")
+    st.plotly_chart(fig_simulation)
 
-        st.write(f"현재 배출량 {current_emissions:.2f}에서 {simulated_emissions:.2f}로")
-        st.write(f"{reduction_percentage}% 감소할 것으로 예상됩니다.")
+    st.write(f"현재 배출량 {current_emissions:.2f}에서 {simulated_emissions:.2f}로")
+    st.write(f"{reduction_percentage}% 감소할 것으로 예상됩니다.")
 
 if __name__ == "__main__":
     show()
