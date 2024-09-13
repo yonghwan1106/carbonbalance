@@ -1,21 +1,22 @@
+# 🔐 Auth Manager
+# This file manages user authentication using Supabase
+
+from supabase import create_client, Client
 import jwt
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
-from config import SECRET_KEY
-from models.user import User
-from utils.db_manager import get_db_session
+from config import SECRET_KEY, SUPABASE_URL, SUPABASE_KEY
 
+# Supabase 클라이언트 초기화
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def authenticate_user(username, password):
-    session = get_db_session()
-    user = session.query(User).filter_by(username=username).first()
-    session.close()
-    if user and check_password_hash(user.password_hash, password):
-        return user
-    else:
-        # 인증 실패 시 로그인 페이지 표시
-        show_login_page()
-        return None
+    response = supabase.table('users').select('*').eq('username', username).execute()
+    if response.data:
+        user = response.data[0]
+        if check_password_hash(user['password_hash'], password):
+            return user
+    return None
 
 def create_token(user_id):
     expiration = datetime.utcnow() + timedelta(hours=24)
@@ -29,47 +30,24 @@ def verify_token(token):
         user_id = payload['user_id']
         return user_id
     except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
-        # 토큰 검증 실패 시 로그인 페이지 표시
-        show_login_page()
         return None
 
 def is_user_authenticated(token):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
-        user_id = payload['user_id']
-        session = get_db_session()
-        user = session.query(User).filter_by(id=user_id).first()
-        session.close()
-        if user:
-            return user
-        else:
-            # 사용자 인증 실패 시 로그인 페이지 표시
-            show_login_page()
-            return None
-    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
-        # 토큰 검증 실패 시 로그인 페이지 표시
-        show_login_page()
-        return None
+    user_id = verify_token(token)
+    if user_id:
+        response = supabase.table('users').select('*').eq('id', user_id).execute()
+        if response.data:
+            return response.data[0]
+    return None
 
 def login_user(username, password):
-    session = get_db_session()
-    user = session.query(User).filter_by(username=username).first()
-    session.close()
-    if user and check_password_hash(user.password_hash, password):
-        token = create_token(user.id)
+    user = authenticate_user(username, password)
+    if user:
+        token = create_token(user['id'])
         return user, token
-    else:
-        # 로그인 실패 시 로그인 페이지 표시
-        show_login_page()
-        return None, None
+    return None, None
 
 def logout_user(token):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
-        user_id = payload['user_id']
-        # 로그아웃 처리 구현
-        return True
-    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
-        # 토큰 검증 실패 시 로그인 페이지 표시
-        show_login_page()
-        return False
+    # Supabase에서는 서버 측 세션을 관리하지 않으므로,
+    # 클라이언트 측에서 토큰을 삭제하는 것으로 충분합니다.
+    return True
