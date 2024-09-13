@@ -8,6 +8,10 @@ import os
 def load_national_data():
     file_path = os.path.join(os.path.dirname(__file__), "..", "data", "carbon_emissions_by_region(2022).csv")
     df = pd.read_csv(file_path)
+    
+    # '총계' 열 재계산
+    df['총계'] = df['탄소배출량'] - df['탄소흡수량']
+    
     return df
 
 @st.cache_data
@@ -27,42 +31,45 @@ def show_national_map():
     df = load_national_data()
     gdf = load_korea_shapefile()
 
-    # 데이터프레임과 GeoDataFrame 결합
-    # 'CTP_KOR_NM' 열이 한글 지역명이라고 가정합니다. 실제 열 이름에 따라 조정하세요.
-    merged_data = gdf.merge(df, left_on="CTP_KOR_NM", right_on="시도별", how='left')
+    if gdf is not None and not gdf.empty:
+        # 데이터 결합
+        merged_data = gdf.merge(df, left_on="ADM_NM", right_on="시도별", how='left')
 
-    # 지도맵 생성
-    fig = px.choropleth_mapbox(merged_data,
-                               geojson=merged_data.geometry,
-                               locations=merged_data.index,
-                               color="탄소배출량",
-                               color_continuous_scale="Viridis",
-                               mapbox_style="carto-positron",
-                               zoom=5.5,
-                               center={"lat": 35.9, "lon": 127.8},
-                               opacity=0.7,
-                               labels={"탄소배출량": "탄소 배출량"},
-                               hover_name="시도별",
-                               hover_data=["탄소배출량", "탄소흡수량", "총계"])
+        # 지도맵 생성
+        fig = px.choropleth_mapbox(merged_data,
+                                   geojson=merged_data.geometry,
+                                   locations=merged_data.index,
+                                   color="총계",
+                                   color_continuous_scale="RdYlGn_r",
+                                   mapbox_style="carto-positron",
+                                   zoom=5.5,
+                                   center={"lat": 35.9, "lon": 127.8},
+                                   opacity=0.7,
+                                   labels={"총계": "순 탄소 배출량"},
+                                   hover_name="시도별",
+                                   hover_data=["탄소배출량", "탄소흡수량", "총계"])
 
-    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0},
-                      height=600)
+        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0},
+                          height=600)
 
-    st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True)
 
-    # 막대 그래프 생성
-    df_sorted = df.sort_values(by="탄소배출량", ascending=False)
-    fig_bar = px.bar(df_sorted, 
-                     x="시도별", 
-                     y=["탄소배출량", "탄소흡수량", "총계"],
-                     title="광역단위별 탄소 배출 및 흡수량",
-                     labels={"value": "톤CO2eq", "variable": "구분"},
-                     height=500)
-    st.plotly_chart(fig_bar, use_container_width=True)
+        # 막대 그래프 생성
+        df_sorted = df.sort_values(by="총계", ascending=False)
+        fig_bar = px.bar(df_sorted, 
+                         x="시도별", 
+                         y=["탄소배출량", "탄소흡수량", "총계"],
+                         title="광역단위별 탄소 배출 및 흡수량",
+                         labels={"value": "톤CO2eq", "variable": "구분"},
+                         height=500,
+                         color_discrete_map={"탄소배출량": "red", "탄소흡수량": "green", "총계": "blue"})
+        st.plotly_chart(fig_bar, use_container_width=True)
 
-    # 데이터 테이블 표시
-    st.subheader("광역단위별 탄소 배출 데이터")
-    st.dataframe(df)
+        # 데이터 테이블 표시
+        st.subheader("광역단위별 탄소 배출 데이터")
+        st.dataframe(df)
+    else:
+        st.error("지도 데이터를 불러오는데 실패했습니다.")
 
 def main():
     st.sidebar.title("탄소 배출 현황 대시보드")
