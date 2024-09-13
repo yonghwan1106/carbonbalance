@@ -170,14 +170,14 @@ def show_main_app():
     )
     
     # 메뉴에 따른 페이지 표시 
-    try:
-        page_func = import_page(menu)
-        if page_func:
-            page_func()
-        else:
-            st.error(f"'{menu}' 페이지를 로드할 수 없습니다.")
-    except Exception as e:
-        st.error(f"페이지 로드 중 오류 발생: {str(e)}")
+    #  try:
+       #   page_func = import_page(menu)
+         # if page_func:
+     #         page_func()
+       #   else:
+         #     st.error(f"'{menu}' 페이지를 로드할 수 없습니다.")
+     # except Exception as e:
+      #    st.error(f"페이지 로드 중 오류 발생: {str(e)}")
 
     # 기본 페이지 (홈) 표시
     if menu == "home":
