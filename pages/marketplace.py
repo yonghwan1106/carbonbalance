@@ -34,7 +34,7 @@ def main():
     st.write("여러분의 노력을 크레딧으로 보상받고 거래해보세요.")
 
     # 사용자 선택
-    user_id = st.number_input("사용자 ID를 입력하세요:", min_value=1, value=1)
+    user_id = st.number_input("사용자 ID를 입력하세요:", min_value=1, value=5)
 
     # 사용자 프로필
     try:
