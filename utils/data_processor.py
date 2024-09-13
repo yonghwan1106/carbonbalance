@@ -34,19 +34,19 @@ def get_latest_national_data():
     }
 
 def analyze_emissions_trend(region_data):
-    """
-    특정 지역의 배출 트렌드를 분석합니다.
-    """
+    if '연도' not in region_data.columns or len(region_data) <= 1:
+        return "트렌드 분석을 위한 충분한 데이터가 없습니다."
+    
     recent_years = region_data.sort_values('연도').tail(5)
+    total_emissions = recent_years['총배출량']
     
-    total_change = recent_years['탄소배출량'].iloc[-1] - recent_years['탄소배출량'].iloc[0]
-    percent_change = (total_change / recent_years['탄소배출량'].iloc[0]) * 100
+    if len(total_emissions) < 2:
+        return "트렌드 분석을 위한 충분한 연도 데이터가 없습니다."
     
-    if percent_change > 0:
-        trend = f"증가 추세 (+{percent_change:.1f}%)"
-    elif percent_change < 0:
-        trend = f"감소 추세 ({percent_change:.1f}%)"
-    else:
-        trend = "안정적"
+    trend = "증가" if total_emissions.iloc[-1] > total_emissions.iloc[0] else "감소"
+    percent_change = ((total_emissions.iloc[-1] - total_emissions.iloc[0]) / total_emissions.iloc[0]) * 100
     
-    return f"최근 5년간 {trend}. 연간 평균 변화량: {total_change/5:.0f} tCO2eq"
+    analysis = f"최근 {len(recent_years)}년간 총 배출량은 {trend} 추세입니다. "
+    analysis += f"첫 해 대비 마지막 해의 배출량 변화율은 {percent_change:.2f}%입니다."
+    
+    return analysis
