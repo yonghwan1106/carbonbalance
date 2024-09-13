@@ -39,10 +39,10 @@ def show_carbon_map():
     gdf = load_geojson()
 
     # ShapeFile의 열 이름 확인
-    st.subheader("ShapeFile 구조")
-    st.write("ShapeFile의 열:", gdf.columns.tolist())
-    st.write("ShapeFile의 지자체명:", gdf['SGG_NM'].tolist())
-    st.write("CSV 파일의 지자체명:", df['지자체명'].tolist())
+    #st.subheader("ShapeFile 구조")
+    #st.write("ShapeFile의 열:", gdf.columns.tolist())
+    #st.write("ShapeFile의 지자체명:", gdf['SGG_NM'].tolist())
+    #st.write("CSV 파일의 지자체명:", df['지자체명'].tolist())
 
     # 지자체명 전처리
     gdf['처리된_지자체명'] = gdf['SGG_NM'].apply(preprocess_name)
