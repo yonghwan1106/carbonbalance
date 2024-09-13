@@ -65,16 +65,17 @@ def main():
 
     amount = st.number_input("거래할 크레딧 양", min_value=1, max_value=max_value, value=1)
 
-    if st.button("거래 실행"):
-        try:
-            manager.execute_transaction(user_id, transaction_type, amount)
-            st.success(f"{amount} 크레딧이 성공적으로 {transaction_type}되었습니다.")
-            # 거래 후 업데이트된 크레딧 현황
-            user_credits = manager.get_credit_balance(user_id)
-            st.write(f"현재 보유 크레딧: {user_credits} 크레딧")
-        except Exception as e:
-            st.error(str(e))
-
+    if transaction_type and amount:
+        if st.button("거래 실행"):
+            try:
+                manager.execute_transaction(user_id, transaction_type, amount)
+                st.success(f"{amount} 크레딧이 성공적으로 {transaction_type}되었습니다.")
+                # 거래 후 업데이트된 크레딧 현황
+                user_credits = manager.get_credit_balance(user_id)
+                st.write(f"현재 보유 크레딧: {user_credits} 크레딧")
+            except Exception as e:
+                st.error(str(e))
+            
     # 거래 내역 확인
     st.subheader("거래 내역")
     try:
