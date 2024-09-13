@@ -13,8 +13,12 @@ def load_national_data():
 @st.cache_data
 def load_korea_shapefile():
     file_path = os.path.join(os.path.dirname(__file__), "..", "data", "ctprvn.shp")
+    st.write(f"Shapefile 경로: {file_path}")  # 경로 출력
+    if not os.path.exists(file_path):
+        st.error(f"Shapefile이 존재하지 않습니다: {file_path}")
+        return None
     gdf = gpd.read_file(file_path)
-    gdf = gdf.to_crs(epsg=4326)  # 좌표계를 WGS84로 변환
+    gdf = gdf.to_crs(epsg=4326)
     return gdf
 
 def show_national_map():
