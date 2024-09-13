@@ -2,12 +2,12 @@ import streamlit as st
 import pandas as pd
 from credit_manager import CreditManager
 
-# Supabase 클라이언트 설정은 credit_manager.py에서 이미 처리되었으므로 여기서는 제거합니다.
-url: str = st.secrets["supabase_url"]
-key: str = st.secrets["supabase_key"]
+# Supabase 연결 정보를 st.secrets에서 가져옵니다
+url = st.secrets["supabase_url"]
+key = st.secrets["supabase_key"]
 
-# CreditManager 인스턴스 생성 (매개변수 없이)
-manager = CreditManager()
+# CreditManager 인스턴스 생성 (url과 key를 인자로 전달)
+manager = CreditManager(url, key)
 
 def main():
     st.title("💰 탄소 크레딧 거래")
