@@ -28,6 +28,10 @@ def load_data():
     df['총배출량'] = df[numeric_columns[:4]].sum(axis=1)
     df['순배출량'] = df['총배출량'] - df['탄소흡수_산림']
     
+    # '연도' 열이 없다면 추가 (예: 모든 행에 2022 할당)
+    if '연도' not in df.columns:
+        df['연도'] = 2022
+    
     return df
 
 @st.cache_data
