@@ -49,7 +49,14 @@ def show():
     # CSV 데이터 파일 로드
     csv_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'gyeonggi_carbon_data_2022.csv')
     try:
-        df = pd.read_csv(csv_path)
+        df = pd.read_csv(csv_path, encoding='euc-kr')
+    except UnicodeDecodeError:
+        try:
+            # euc-kr로 읽기 실패시 cp949로 시도
+            df = pd.read_csv(csv_path, encoding='cp949')
+        except Exception as e:
+            st.error(f"데이터 로딩 중 오류가 발생했습니다: {str(e)}")
+            st.stop()
     except Exception as e:
         st.error(f"데이터 로딩 중 오류가 발생했습니다: {str(e)}")
         st.stop()
