@@ -4,25 +4,29 @@ import geopandas as gpd
 import plotly.express as px
 import os
 
+def clean_region_name(name):
+    # 필요에 따라 지역 이름을 정제하는 로직 추가
+    return name.replace('특별시', '').replace('광역시', '').replace('특별자치시', '').replace('도', '').strip()
+
 @st.cache_data
 def load_national_data():
     file_path = os.path.join(os.path.dirname(__file__), "..", "data", "carbon_emissions_by_region(2022).csv")
     df = pd.read_csv(file_path)
-    
-    # '총계' 열 재계산
+    df['시도별'] = df['시도별'].apply(clean_region_name)
     df['총계'] = df['탄소배출량'] - df['탄소흡수량']
-    
     return df
 
 @st.cache_data
 def load_korea_shapefile():
     file_path = os.path.join(os.path.dirname(__file__), "..", "data", "ctprvn.shp")
-    st.write(f"Shapefile 경로: {file_path}")  # 경로 출력
+    st.write(f"Shapefile 경로: {file_path}")
     if not os.path.exists(file_path):
         st.error(f"Shapefile이 존재하지 않습니다: {file_path}")
         return None
     gdf = gpd.read_file(file_path)
     gdf = gdf.to_crs(epsg=4326)
+    gdf['CTP_KOR_NM'] = gdf['CTP_KOR_NM'].apply(clean_region_name)
+    st.write("Shapefile 열 이름:", gdf.columns.tolist())
     return gdf
 
 def show_national_map():
@@ -32,8 +36,8 @@ def show_national_map():
     gdf = load_korea_shapefile()
 
     if gdf is not None and not gdf.empty:
-        # 데이터 결합
-        merged_data = gdf.merge(df, left_on="ADM_NM", right_on="시도별", how='left')
+        # 데이터 결합 (열 이름을 실제 Shapefile의 열 이름으로 변경)
+        merged_data = gdf.merge(df, left_on="CTP_KOR_NM", right_on="시도별", how='left')
 
         # 지도맵 생성
         fig = px.choropleth_mapbox(merged_data,
